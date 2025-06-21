@@ -49,8 +49,16 @@ func runWebserver(shutdownCtx context.Context) {
 
 	})
 
+	// Has the admin user been created?
+
+	app.Get("/can-register", account.CanRegister)
+
 	app.Post("/register", account.Register)
 	app.Post("/login", account.Login)
+	app.Get("/account", middleware.OnlyAuthenticatedUsers, account.GetAccount)
+	app.Patch("/account/change-full-name", middleware.OnlyAuthenticatedUsers, account.ChangeFullName)
+	app.Patch("/account/change-password", middleware.OnlyAuthenticatedUsers, account.ChangePassword)
+	app.Patch("/account/change-email", middleware.OnlyAuthenticatedUsers, account.ChangeEmail)
 	app.Post("/logout", middleware.OnlyAuthenticatedUsers, account.Logout)
 
 	app.All("*", func(c *fiber.Ctx) error {
@@ -64,7 +72,7 @@ func runWebserver(shutdownCtx context.Context) {
 
 	go func() {
 
-		if err := app.Listen("127.0.0.1:" + config.HttpPort); err != nil {
+		if err := app.Listen(config.ListenAddress + ":" + config.HttpPort); err != nil {
 			log.Fatalf("Error starting HTTP server: %v", err)
 		}
 

@@ -228,6 +228,156 @@ func createUser(fullName string, emailAddress string, password string) shared.Re
 
 }
 
+func updateFullName(userId primitive.ObjectID, fullName string) shared.ResponseMessage {
+
+	collection := database.MongoConn.Collection("users")
+
+	filter := bson.M{
+		"_id": userId,
+	}
+
+	_, err := collection.UpdateOne(context.Background(), filter, bson.M{
+		"$set": bson.M{
+			"full_name": fullName,
+		},
+	})
+
+	if err != nil {
+
+		return shared.ResponseMessage{
+			Success: false,
+			Message: fmt.Sprintf("There was an error updating your full name, please try again. Error: %s", err.Error()),
+		}
+
+	}
+
+	return shared.ResponseMessage{
+		Success: true,
+		Message: "Your full name has been successfully updated.",
+	}
+
+}
+
+func changeUserPassword(userId primitive.ObjectID, currentPassword string, newPassword string) shared.ResponseMessage {
+
+	if util.ValidatePassword(newPassword) == false {
+
+		return shared.ResponseMessage{
+			Success: false,
+			Message: "The new password must be between 8 and 100 characters.",
+		}
+
+	}
+
+	collection := database.MongoConn.Collection("users")
+
+	user, err := model.GetUserBy("_id", userId.Hex())
+
+	if err != nil {
+
+		return shared.ResponseMessage{
+			Success: false,
+			Message: "There was an error changing your password, please try again.",
+		}
+
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(currentPassword))
+
+	if err != nil {
+
+		return shared.ResponseMessage{
+			Success: false,
+			Message: "The current password is incorrect.",
+		}
+
+	}
+
+	passwordHash, err := hashPassword(newPassword)
+
+	if err != nil {
+
+		return shared.ResponseMessage{
+			Success: false,
+			Message: "There was an error changing your password, please try again.",
+		}
+
+	}
+
+	filter := bson.M{
+		"_id": userId,
+	}
+
+	_, err = collection.UpdateOne(context.Background(), filter, bson.M{
+		"$set": bson.M{
+			"password_hash": *passwordHash,
+		},
+	})
+
+	if err != nil {
+
+		return shared.ResponseMessage{
+			Success: false,
+			Message: fmt.Sprintf("There was an error changing your password, please try again."),
+		}
+
+	}
+
+	return shared.ResponseMessage{
+		Success: true,
+		Message: "Your password has been successfully updated.",
+	}
+
+}
+
+func changeUserEmail(userId primitive.ObjectID, newEmailAddress string) shared.ResponseMessage {
+
+	if util.ValidateEmail(newEmailAddress) == false {
+
+		return shared.ResponseMessage{
+			Success: false,
+			Message: "The new email address is not valid.",
+		}
+
+	}
+
+	if doesEmailAddressExist(newEmailAddress) {
+
+		return shared.ResponseMessage{
+			Success: false,
+			Message: "The new email address is already in use.",
+		}
+
+	}
+
+	collection := database.MongoConn.Collection("users")
+
+	filter := bson.M{
+		"_id": userId,
+	}
+
+	_, err := collection.UpdateOne(context.Background(), filter, bson.M{
+		"$set": bson.M{
+			"email_address": newEmailAddress,
+		},
+	})
+
+	if err != nil {
+
+		return shared.ResponseMessage{
+			Success: false,
+			Message: fmt.Sprintf("There was an error changing your email address, please try again. Error: %s", err.Error()),
+		}
+
+	}
+
+	return shared.ResponseMessage{
+		Success: true,
+		Message: "Your email address has been successfully updated.",
+	}
+
+}
+
 func logout(userId primitive.ObjectID, token string) {
 
 	collection := database.MongoConn.Collection("login_tokens")

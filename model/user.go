@@ -22,6 +22,10 @@ func GetUserBy(column string, value string) (*User, error) {
 
 	filter := bson.M{column: value}
 
+	if column == "_id" {
+		filter = bson.M{column: primitive.ObjectIDFromHex(value)}
+	}
+
 	var user User
 
 	err := collection.FindOne(context.Background(), filter).Decode(&user)

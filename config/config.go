@@ -15,6 +15,7 @@ var FrontendUrl string
 
 var BackendUrl string
 var HttpPort string
+var ListenAddress string
 
 func loadConfig() {
 
@@ -34,6 +35,7 @@ func loadConfig() {
 
 	BackendUrl = os.Getenv("BACKEND_URL")
 	HttpPort = os.Getenv("HTTP_PORT")
+	ListenAddress = os.Getenv("LISTEN_ADDRESS")
 
 }
 
