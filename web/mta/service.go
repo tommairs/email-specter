@@ -173,9 +173,20 @@ func rotateSecretToken(mtaID string) map[string]interface{} {
 
 	}
 
+	secretToken, err := util.GenerateRandomString(secretTokenLength / 2)
+
+	if err != nil {
+
+		return map[string]interface{}{
+			"success": false,
+			"message": "Failed to generate new secret token: " + err.Error(),
+		}
+
+	}
+
 	update := primitive.M{
 		"$set": primitive.M{
-			"secret_token": util.GenerateRandomString(secretTokenLength / 2),
+			"secret_token": secretToken,
 		},
 	}
 

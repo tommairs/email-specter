@@ -23,7 +23,15 @@ func GetUserBy(column string, value string) (*User, error) {
 	filter := bson.M{column: value}
 
 	if column == "_id" {
-		filter = bson.M{column: primitive.ObjectIDFromHex(value)}
+
+		id, err := primitive.ObjectIDFromHex(value)
+
+		if err != nil {
+			return nil, err
+		}
+
+		filter = bson.M{"_id": id}
+		
 	}
 
 	var user User

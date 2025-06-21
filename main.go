@@ -7,6 +7,7 @@ import (
 	"email-specter/web/account"
 	"email-specter/web/middleware"
 	"email-specter/web/mta"
+	"email-specter/web/webhook"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/gofiber/fiber/v2"
 	"log"
@@ -72,7 +73,9 @@ func runWebserver(shutdownCtx context.Context) {
 
 	// Webhook Collector
 
-	app.Post("/collect/:id/:token", middleware.OnlyAuthenticatedUsers, account.CollectWebhook)
+	app.Post("/webhook/:id/:token", middleware.OnlyAuthenticatedUsers, webhook.ProcessWebhook)
+
+	// Not Found Handler
 
 	app.All("*", func(c *fiber.Ctx) error {
 
