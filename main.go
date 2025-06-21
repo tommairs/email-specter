@@ -6,6 +6,7 @@ import (
 	"email-specter/task"
 	"email-specter/web/account"
 	"email-specter/web/middleware"
+	"email-specter/web/mta"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/gofiber/fiber/v2"
 	"log"
@@ -60,6 +61,18 @@ func runWebserver(shutdownCtx context.Context) {
 	app.Patch("/account/change-password", middleware.OnlyAuthenticatedUsers, account.ChangePassword)
 	app.Patch("/account/change-email", middleware.OnlyAuthenticatedUsers, account.ChangeEmail)
 	app.Post("/logout", middleware.OnlyAuthenticatedUsers, account.Logout)
+
+	// Add an MTA
+
+	app.Get("/mta", middleware.OnlyAuthenticatedUsers, mta.GetAllMTAs)
+	app.Post("/mta/add", middleware.OnlyAuthenticatedUsers, mta.AddMTA)
+	app.Patch("/mta/:id", middleware.OnlyAuthenticatedUsers, mta.EditMTA)
+	app.Delete("/mta/:id", middleware.OnlyAuthenticatedUsers, mta.DeleteMTA)
+	app.Post("/mta/:id/rotate-secret-token", middleware.OnlyAuthenticatedUsers, mta.RotateSecretToken)
+
+	// Webhook Collector
+
+	app.Post("/collect/:id/:token", middleware.OnlyAuthenticatedUsers, account.CollectWebhook)
 
 	app.All("*", func(c *fiber.Ctx) error {
 
