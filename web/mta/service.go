@@ -43,7 +43,7 @@ func getAllMTAs() map[string]interface{} {
 			ID:            mta.ID,
 			Name:          mta.Name,
 			SecretToken:   mta.SecretToken,
-			CollectionUrl: config.BackendUrl + "collect/" + mta.ID + "/" + mta.SecretToken,
+			CollectionUrl: config.BackendUrl + "webhook/" + mta.ID.Hex() + "/" + mta.SecretToken,
 		}
 
 	}
@@ -68,7 +68,7 @@ func addMTA(name string) map[string]interface{} {
 	}
 
 	mta := model.MTA{
-		ID:          primitive.NewObjectID().Hex(),
+		ID:          primitive.NewObjectID(),
 		Name:        name,
 		SecretToken: secretToken,
 	}

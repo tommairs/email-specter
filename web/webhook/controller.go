@@ -1,6 +1,7 @@
 package webhook
 
 import (
+	"email-specter/model"
 	"email-specter/util"
 	"email-specter/web/shared"
 	"github.com/gofiber/fiber/v2"
@@ -8,7 +9,7 @@ import (
 
 func ProcessWebhook(c *fiber.Ctx) error {
 
-	var body map[interface{}]interface{}
+	var body model.WebhookEvent
 
 	id := c.Params("id")
 	token := c.Params("token")

@@ -66,14 +66,14 @@ func runWebserver(shutdownCtx context.Context) {
 	// Add an MTA
 
 	app.Get("/mta", middleware.OnlyAuthenticatedUsers, mta.GetAllMTAs)
-	app.Post("/mta/add", middleware.OnlyAuthenticatedUsers, mta.AddMTA)
+	app.Post("/mta", middleware.OnlyAuthenticatedUsers, mta.AddMTA)
 	app.Patch("/mta/:id", middleware.OnlyAuthenticatedUsers, mta.EditMTA)
 	app.Delete("/mta/:id", middleware.OnlyAuthenticatedUsers, mta.DeleteMTA)
 	app.Post("/mta/:id/rotate-secret-token", middleware.OnlyAuthenticatedUsers, mta.RotateSecretToken)
 
 	// Webhook Collector
 
-	app.Post("/webhook/:id/:token", middleware.OnlyAuthenticatedUsers, webhook.ProcessWebhook)
+	app.Post("/webhook/:id/:token", webhook.ProcessWebhook)
 
 	// Not Found Handler
 

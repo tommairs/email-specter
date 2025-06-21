@@ -2,7 +2,6 @@ package account
 
 import (
 	"email-specter/util"
-	"email-specter/web/shared"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -15,7 +14,12 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	if err := util.ParseBodyRequest(c, &request); err != nil {
-		return c.JSON(shared.ResponseMessage{Success: false, Message: util.FormatError(err)})
+
+		return c.JSON(map[string]interface{}{
+			"success": false,
+			"message": util.FormatError(err),
+		})
+
 	}
 
 	response := authenticateUser(request.EmailAddress, request.Password)
@@ -33,7 +37,12 @@ func Register(c *fiber.Ctx) error {
 	}
 
 	if err := util.ParseBodyRequest(c, &request); err != nil {
-		return c.JSON(shared.ResponseMessage{Success: false, Message: util.FormatError(err)})
+
+		return c.JSON(map[string]interface{}{
+			"success": false,
+			"message": util.FormatError(err),
+		})
+
 	}
 
 	response := createUser(request.FullName, request.EmailAddress, request.Password)
@@ -63,7 +72,11 @@ func Logout(c *fiber.Ctx) error {
 
 	logout(userId, token)
 
-	return c.JSON(shared.ResponseMessage{Success: true, Message: "You have been successfully logged out."})
+	return c.JSON(map[string]interface{}{
+		"success": true,
+		"message": "You have been logged out successfully.",
+		"data":    nil,
+	})
 
 }
 
@@ -88,7 +101,12 @@ func ChangeFullName(c *fiber.Ctx) error {
 	}
 
 	if err := util.ParseBodyRequest(c, &request); err != nil {
-		return c.JSON(shared.ResponseMessage{Success: false, Message: util.FormatError(err)})
+
+		return c.JSON(map[string]interface{}{
+			"success": false,
+			"message": util.FormatError(err),
+		})
+
 	}
 
 	response := updateFullName(c.Locals("user_id").(primitive.ObjectID), request.FullName)
@@ -105,7 +123,12 @@ func ChangePassword(c *fiber.Ctx) error {
 	}
 
 	if err := util.ParseBodyRequest(c, &request); err != nil {
-		return c.JSON(shared.ResponseMessage{Success: false, Message: util.FormatError(err)})
+
+		return c.JSON(map[string]interface{}{
+			"success": false,
+			"message": util.FormatError(err),
+		})
+
 	}
 
 	response := changeUserPassword(c.Locals("user_id").(primitive.ObjectID), request.CurrentPassword, request.NewPassword)
@@ -121,7 +144,12 @@ func ChangeEmail(c *fiber.Ctx) error {
 	}
 
 	if err := util.ParseBodyRequest(c, &request); err != nil {
-		return c.JSON(shared.ResponseMessage{Success: false, Message: util.FormatError(err)})
+
+		return c.JSON(map[string]interface{}{
+			"success": false,
+			"message": util.FormatError(err),
+		})
+
 	}
 
 	response := changeUserEmail(c.Locals("user_id").(primitive.ObjectID), request.NewEmailAddress)

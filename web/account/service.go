@@ -185,7 +185,7 @@ func createUser(fullName string, emailAddress string, password string) shared.Re
 
 		return shared.ResponseMessage{
 			Success: false,
-			Message: util.FormatError(err),
+			Message: err.Error(),
 		}
 
 	} else if doesEmailAddressExist(emailAddress) {

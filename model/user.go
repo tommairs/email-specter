@@ -4,6 +4,7 @@ import (
 	"context"
 	"email-specter/database"
 	"errors"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -31,7 +32,7 @@ func GetUserBy(column string, value string) (*User, error) {
 		}
 
 		filter = bson.M{"_id": id}
-		
+
 	}
 
 	var user User
@@ -41,7 +42,7 @@ func GetUserBy(column string, value string) (*User, error) {
 	if err != nil {
 
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, nil
+			return nil, fmt.Errorf("user not found: %s", value)
 		}
 
 		return nil, err
