@@ -1,0 +1,133 @@
+package main
+
+import (
+	"context"
+	"email-specter/config"
+	"email-specter/task"
+	"email-specter/web/account"
+	"email-specter/web/middleware"
+	"github.com/go-co-op/gocron/v2"
+	"github.com/gofiber/fiber/v2"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+)
+
+const maxBodySize = 5 * 1024 * 1024 * 1024
+
+func runWebserver(shutdownCtx context.Context) {
+
+	app := fiber.New(fiber.Config{
+		Prefork:   false,
+		BodyLimit: maxBodySize,
+	})
+
+	app.Use(func(c *fiber.Ctx) error {
+
+		// Maybe replace with this an actual domain name later.
+
+		c.Set("Access-Control-Allow-Origin", "*")
+		c.Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+		c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if c.Method() == fiber.MethodOptions {
+			return c.SendStatus(fiber.StatusNoContent)
+		}
+
+		return c.Next()
+
+	})
+
+	app.Get("/", func(c *fiber.Ctx) error {
+
+		return c.JSON(fiber.Map{
+			"success": true,
+			"message": "Welcome to the Email Specter API!",
+		})
+
+	})
+
+	app.Post("/register", account.Register)
+	app.Post("/login", account.Login)
+	app.Post("/logout", middleware.OnlyAuthenticatedUsers, account.Logout)
+
+	app.All("*", func(c *fiber.Ctx) error {
+
+		return c.JSON(fiber.Map{
+			"success": false,
+			"message": "Quo vadis, amicus?",
+		})
+
+	})
+
+	go func() {
+
+		if err := app.Listen("127.0.0.1:" + config.HttpPort); err != nil {
+			log.Fatalf("Error starting HTTP server: %v", err)
+		}
+
+	}()
+
+	<-shutdownCtx.Done()
+
+	_ = app.Shutdown()
+
+	log.Println("Webserver shutting down...")
+
+}
+
+func handleScheduleError(_ gocron.Job, err error) {
+
+	if err != nil {
+		panic(err)
+	}
+
+}
+
+func runScheduler(shutdownCtx context.Context) {
+
+	s, err := gocron.NewScheduler()
+
+	if err != nil {
+		log.Fatalf("Error starting scheduler: %v", err)
+	}
+
+	handleScheduleError(s.NewJob(gocron.DurationJob(1*time.Hour), gocron.NewTask(task.CleanLoginTokens)))
+
+	s.Start()
+	<-shutdownCtx.Done()
+	s.Shutdown()
+
+	log.Println("Scheduler shutting down...")
+
+}
+
+func boot() {
+
+	// Any bootstrapping logic goes here.
+
+}
+
+func main() {
+
+	shutdownCtx, shutdownCancel := context.WithCancel(context.Background())
+	defer shutdownCancel()
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+
+	defer signal.Stop(signalChan)
+
+	go boot()
+	go runScheduler(shutdownCtx)
+	go runWebserver(shutdownCtx)
+
+	<-signalChan
+
+	shutdownCancel()
+
+	log.Println("Received shutdown signal, shutting down...")
+
+}
