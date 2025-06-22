@@ -3,7 +3,6 @@ package webhook
 import (
 	"email-specter/model"
 	"email-specter/util"
-	"email-specter/web/shared"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -15,19 +14,39 @@ func ProcessWebhook(c *fiber.Ctx) error {
 	token := c.Params("token")
 
 	if !isAuthenticated(id, token) {
-		return c.JSON(shared.ResponseMessage{Success: false, Message: "You are not authorized to access this resource."})
+
+		return c.JSON(map[string]interface{}{
+			"success": false,
+			"message": "You are not authorized to access this resource.",
+		})
+
 	}
 
 	if err := util.ParseBodyRequest(c, &body); err != nil {
-		return c.JSON(shared.ResponseMessage{Success: false, Message: util.FormatError(err)})
+
+		return c.JSON(map[string]interface{}{
+			"success": false,
+			"message": util.FormatError(err),
+		})
+
 	}
 
 	response := processWebhook(id, body)
 
 	if response {
-		return c.JSON(shared.ResponseMessage{Success: true, Message: "The webhook has been processed."})
+
+		return c.JSON(map[string]interface{}{
+			"success": true,
+			"message": "Webhook processed successfully.",
+		})
+
 	} else {
-		return c.JSON(shared.ResponseMessage{Success: false, Message: "We could not process the webhook."})
+
+		return c.JSON(map[string]interface{}{
+			"success": false,
+			"message": "There was an error processing the webhook.",
+		})
+
 	}
 
 }

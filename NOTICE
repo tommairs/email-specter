@@ -1,0 +1,7 @@
+This project includes third-party code under the EUPL v1.2:
+
+- `config/bounce_categories/bounce_categories.json` is a modified version of software originally licensed under the EUPL v1.2.
+  Original author: Zone Media OÜ
+  Source: https://github.com/zone-eu/zone-mta/blob/master/config/bounces.txt
+
+This file remains licensed under the EUPL v1.2.

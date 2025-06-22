@@ -17,6 +17,9 @@ var BackendUrl string
 var HttpPort string
 var ListenAddress string
 
+var LogRetentionPeriod time.Duration
+var DataRetentionPeriod time.Duration
+
 func loadConfig() {
 
 	err := godotenv.Load(".env")
@@ -36,6 +39,9 @@ func loadConfig() {
 	BackendUrl = os.Getenv("BACKEND_URL")
 	HttpPort = os.Getenv("HTTP_PORT")
 	ListenAddress = os.Getenv("LISTEN_ADDRESS")
+
+	LogRetentionPeriod, _ = time.ParseDuration(os.Getenv("LOG_RETENTION_PERIOD"))
+	DataRetentionPeriod, _ = time.ParseDuration(os.Getenv("DATA_RETENTION_PERIOD"))
 
 }
 

@@ -11,13 +11,7 @@
 
 ## Features
 
-- **Dashboard Overview**: View total sent, delivered, bounced, and deferred emails with time-based trends.
-- **Advanced Search**: Filter logs by sender, recipient, domain, status, IP, queue ID, and more.
-- **Delivery Reports**: Breakdown of delivery success, delays, bounce types, and response codes.
-- **Message Drilldown**: See the full delivery lifecycle and SMTP interactions of individual emails.
-- **Bounce Reason Classification**: Understand why emails failed using parsed SMTP responses.
-- **Queue Monitoring**: Track queue sizes, retry attempts, and stuck deliveries in real-time.
-- **Tag & Campaign Analysis**: Monitor campaign performance using custom metadata tags.
+TODO
 
 ## Installation
 
@@ -37,6 +31,11 @@ Contributions are welcome, but please open an issue to discuss your plans before
 ## Support
 
 If you need any help or have a question, please open an issue.
+
+## Credits
+
+- [KumoMTA](https://github.com/kumocorp/kumomta)
+- [Zone Media OÜ](https://github.com/zone-eu/zone-mta) (please refer to NOTICE for license details)
 
 ## License
 

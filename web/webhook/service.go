@@ -5,21 +5,91 @@ import (
 	"email-specter/model"
 	"encoding/json"
 	"errors"
+	"github.com/dlclark/regexp2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"net"
 	"os"
+	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
 
-const serviceProvidersSeedListPath = "config/service_providers.json"
+const bounceClassificationsPath = "config/bounce_categories/bounce_categories.json"
+const serviceProvidersSeedListPath = "config/service_providers/service_providers.json"
 
 var ServiceProviders []model.ServiceProvider
+var BounceCategories model.BounceCategories
 
 func init() {
 	loadServiceProviders()
+	loadBounceCategories()
+}
+
+func toFieldName(key string) string {
+
+	parts := strings.Split(key, "_")
+
+	for i, part := range parts {
+		parts[i] = strings.Title(part)
+	}
+
+	return strings.Join(parts, "")
+
+}
+
+func loadBounceCategories() {
+
+	contents, err := os.ReadFile(bounceClassificationsPath)
+
+	if err != nil {
+		panic("Failed to read bounce classifications: " + err.Error())
+	}
+
+	var raw map[string][]string
+
+	err = json.Unmarshal(contents, &raw)
+
+	if err != nil {
+		panic("Failed to parse bounce classifications: " + err.Error())
+	}
+
+	var result model.BounceCategories
+
+	val := reflect.ValueOf(&result).Elem()
+
+	for key, patterns := range raw {
+
+		fieldName := toFieldName(key)
+
+		field := val.FieldByName(fieldName)
+
+		if !field.IsValid() || !field.CanSet() {
+			panic("Unknown or unassignable field: " + fieldName)
+		}
+
+		var compiled []regexp2.Regexp
+
+		for _, pattern := range patterns {
+
+			re, err := regexp2.Compile(pattern, 0)
+
+			if err != nil {
+				panic("Invalid regex in " + key + ": " + err.Error())
+			}
+
+			compiled = append(compiled, *re)
+
+		}
+
+		field.Set(reflect.ValueOf(compiled))
+
+	}
+
+	BounceCategories = result
+
 }
 
 func loadServiceProviders() {
@@ -138,6 +208,9 @@ func getDomain(email string) string {
 
 func getServiceName(peerName string, domain string) string {
 
+	peerName = strings.ToLower(strings.TrimSuffix(strings.TrimSpace(peerName), "."))
+	domain = strings.ToLower(strings.TrimSuffix(strings.TrimSpace(domain), "."))
+
 	for _, provider := range ServiceProviders {
 
 		if provider.CompiledRegex.MatchString(peerName) || provider.CompiledRegex.MatchString(domain) {
@@ -166,7 +239,7 @@ func handleBounceEvent(mtaId primitive.ObjectID, webhookData model.WebhookEvent)
 		return false
 	}
 
-	return updateMessageStatus(message, event, webhookData.Type, currentTime)
+	return updateMessageStatus(webhookData, message, event, webhookData.Type, currentTime)
 
 }
 
@@ -186,7 +259,7 @@ func handleTransientFailureEvent(mtaId primitive.ObjectID, webhookData model.Web
 		return false
 	}
 
-	return updateMessageStatus(message, event, webhookData.Type, currentTime)
+	return updateMessageStatus(webhookData, message, event, webhookData.Type, currentTime)
 
 }
 
@@ -206,7 +279,7 @@ func handleDeliveryEvent(mtaId primitive.ObjectID, webhookData model.WebhookEven
 		return false
 	}
 
-	return updateMessageStatus(message, event, webhookData.Type, currentTime)
+	return updateMessageStatus(webhookData, message, event, webhookData.Type, currentTime)
 
 }
 
@@ -253,8 +326,8 @@ func createMessage(mtaId primitive.ObjectID, currentTime time.Time, webhookData 
 		Sender:                           webhookData.Sender,
 		Recipient:                        webhookData.Recipient,
 		Events:                           []model.Event{},
-		KumoMtaBounceClassification:      "",
-		EmailSpecterBounceClassification: "",
+		KumoMtaBounceClassification:      webhookData.BounceClassification,
+		EmailSpecterBounceClassification: categorizeBounce(webhookData),
 		LastStatus:                       webhookData.Type,
 		CreatedAt:                        currentTime,
 		UpdatedAt:                        currentTime,
@@ -264,12 +337,68 @@ func createMessage(mtaId primitive.ObjectID, currentTime time.Time, webhookData 
 
 }
 
-func updateMessageStatus(message *model.Message, event model.Event, status string, currentTime time.Time) bool {
+func getFullBounceMessage(webhookData model.WebhookEvent) string {
+
+	if webhookData.Type != "TransientFailure" && webhookData.Type != "Bounce" {
+		return ""
+	}
+
+	smtpResponseCode := webhookData.Response.Code
+	enhancedCode := webhookData.Response.EnhancedCode // C.S.D
+	content := webhookData.Response.Content
+
+	bounceMessage := strconv.Itoa(smtpResponseCode) + " " + content
+
+	if enhancedCode != nil {
+		bounceMessage = strconv.Itoa(smtpResponseCode) + " " + strconv.Itoa(enhancedCode.Class) + "." + strconv.Itoa(enhancedCode.Subject) + "." + strconv.Itoa(enhancedCode.Detail) + " " + content
+	}
+
+	return bounceMessage
+
+}
+
+func categorizeBounce(webhookData model.WebhookEvent) string {
+
+	bounceMessage := getFullBounceMessage(webhookData)
+
+	if bounceMessage == "" {
+		return ""
+	}
+
+	for category, patterns := range BounceCategories.GetCategories() {
+
+		for _, pattern := range patterns {
+
+			if match, _ := pattern.MatchString(bounceMessage); match {
+				return category
+			}
+
+		}
+
+	}
+
+	return "Other"
+
+}
+
+func updateMessageStatus(webhookData model.WebhookEvent, message *model.Message, event model.Event, status string, currentTime time.Time) bool {
 
 	message.Events = append(message.Events, event)
 
 	message.LastStatus = status
 	message.UpdatedAt = currentTime
+
+	if status == "Bounce" || status == "TransientFailure" {
+
+		message.KumoMtaBounceClassification = webhookData.BounceClassification
+		message.EmailSpecterBounceClassification = categorizeBounce(webhookData)
+
+	} else {
+
+		message.KumoMtaBounceClassification = ""
+		message.EmailSpecterBounceClassification = ""
+
+	}
 
 	return message.Save() == nil
 
@@ -285,7 +414,7 @@ func getOrCreateMessage(mtaId primitive.ObjectID, webhookData model.WebhookEvent
 
 			message = createMessage(mtaId, currentTime, webhookData)
 
-			if err := message.Save(); err != nil {
+			if err := message.Insert(); err != nil {
 				return nil, err
 			}
 

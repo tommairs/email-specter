@@ -7,7 +7,6 @@ import (
 	"email-specter/model"
 	"email-specter/util"
 	"email-specter/web/middleware"
-	"email-specter/web/shared"
 	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
@@ -172,27 +171,27 @@ func isFirstUser() bool {
 
 }
 
-func createUser(fullName string, emailAddress string, password string) shared.ResponseMessage {
+func createUser(fullName string, emailAddress string, password string) map[string]interface{} {
 
 	if isFirstUser() == false {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: "It seems that the first user has already been created. If you are locked out, please ask an administrator to reset your account and/or hack the database to create a new user.",
+		return map[string]interface{}{
+			"success": false,
+			"message": "It seems that the first user has already been created. If you are locked out, please ask an administrator to reset your account and/or hack the database to create a new user.",
 		}
 
 	} else if err := validateRegistrationPayload(fullName, emailAddress, password); err != nil {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: err.Error(),
+		return map[string]interface{}{
+			"success": false,
+			"message": err.Error(),
 		}
 
 	} else if doesEmailAddressExist(emailAddress) {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: "The email address is already in use.",
+		return map[string]interface{}{
+			"success": false,
+			"message": "The email address is already in use.",
 		}
 
 	} else {
@@ -201,9 +200,9 @@ func createUser(fullName string, emailAddress string, password string) shared.Re
 
 		if err != nil {
 
-			return shared.ResponseMessage{
-				Success: false,
-				Message: "There was an error hashing your password, please try again.",
+			return map[string]interface{}{
+				"success": false,
+				"message": "There was an error hashing your password, please try again.",
 			}
 
 		}
@@ -212,23 +211,23 @@ func createUser(fullName string, emailAddress string, password string) shared.Re
 
 		if err != nil {
 
-			return shared.ResponseMessage{
-				Success: false,
-				Message: fmt.Sprintf("There was an error creating your account, please try again. Error: %s", err.Error()),
+			return map[string]interface{}{
+				"success": false,
+				"message": fmt.Sprintf("There was an error creating your account, please try again. Error: %s", err.Error()),
 			}
 
 		}
 
-		return shared.ResponseMessage{
-			Success: true,
-			Message: "You have been successfully registered. You can now log in.",
+		return map[string]interface{}{
+			"success": true,
+			"message": "You have been successfully registered. You can now log in.",
 		}
 
 	}
 
 }
 
-func updateFullName(userId primitive.ObjectID, fullName string) shared.ResponseMessage {
+func updateFullName(userId primitive.ObjectID, fullName string) map[string]interface{} {
 
 	collection := database.MongoConn.Collection("users")
 
@@ -244,27 +243,27 @@ func updateFullName(userId primitive.ObjectID, fullName string) shared.ResponseM
 
 	if err != nil {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: fmt.Sprintf("There was an error updating your full name, please try again. Error: %s", err.Error()),
+		return map[string]interface{}{
+			"success": false,
+			"message": fmt.Sprintf("There was an error updating your full name, please try again. Error: %s", err.Error()),
 		}
 
 	}
 
-	return shared.ResponseMessage{
-		Success: true,
-		Message: "Your full name has been successfully updated.",
+	return map[string]interface{}{
+		"success": true,
+		"message": "Your full name has been successfully updated.",
 	}
 
 }
 
-func changeUserPassword(userId primitive.ObjectID, currentPassword string, newPassword string) shared.ResponseMessage {
+func changeUserPassword(userId primitive.ObjectID, currentPassword string, newPassword string) map[string]interface{} {
 
 	if util.ValidatePassword(newPassword) == false {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: "The new password must be between 8 and 100 characters.",
+		return map[string]interface{}{
+			"success": false,
+			"message": "The new password must be between 8 and 100 characters.",
 		}
 
 	}
@@ -275,9 +274,9 @@ func changeUserPassword(userId primitive.ObjectID, currentPassword string, newPa
 
 	if err != nil {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: "There was an error changing your password, please try again.",
+		return map[string]interface{}{
+			"success": false,
+			"message": "There was an error changing your password, please try again.",
 		}
 
 	}
@@ -286,9 +285,9 @@ func changeUserPassword(userId primitive.ObjectID, currentPassword string, newPa
 
 	if err != nil {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: "The current password is incorrect.",
+		return map[string]interface{}{
+			"success": false,
+			"message": "The current password is incorrect.",
 		}
 
 	}
@@ -297,9 +296,9 @@ func changeUserPassword(userId primitive.ObjectID, currentPassword string, newPa
 
 	if err != nil {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: "There was an error changing your password, please try again.",
+		return map[string]interface{}{
+			"success": false,
+			"message": "There was an error changing your password, please try again.",
 		}
 
 	}
@@ -316,36 +315,36 @@ func changeUserPassword(userId primitive.ObjectID, currentPassword string, newPa
 
 	if err != nil {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: fmt.Sprintf("There was an error changing your password, please try again."),
+		return map[string]interface{}{
+			"success": false,
+			"message": fmt.Sprintf("There was an error changing your password, please try again."),
 		}
 
 	}
 
-	return shared.ResponseMessage{
-		Success: true,
-		Message: "Your password has been successfully updated.",
+	return map[string]interface{}{
+		"success": true,
+		"message": "Your password has been successfully updated.",
 	}
 
 }
 
-func changeUserEmail(userId primitive.ObjectID, newEmailAddress string) shared.ResponseMessage {
+func changeUserEmail(userId primitive.ObjectID, newEmailAddress string) map[string]interface{} {
 
 	if util.ValidateEmail(newEmailAddress) == false {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: "The new email address is not valid.",
+		return map[string]interface{}{
+			"success": false,
+			"message": "The new email address is not valid.",
 		}
 
 	}
 
 	if doesEmailAddressExist(newEmailAddress) {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: "The new email address is already in use.",
+		return map[string]interface{}{
+			"success": false,
+			"message": "The new email address is already in use.",
 		}
 
 	}
@@ -364,16 +363,16 @@ func changeUserEmail(userId primitive.ObjectID, newEmailAddress string) shared.R
 
 	if err != nil {
 
-		return shared.ResponseMessage{
-			Success: false,
-			Message: fmt.Sprintf("There was an error changing your email address, please try again. Error: %s", err.Error()),
+		return map[string]interface{}{
+			"success": false,
+			"message": fmt.Sprintf("There was an error changing your email address, please try again. Error: %s", err.Error()),
 		}
 
 	}
 
-	return shared.ResponseMessage{
-		Success: true,
-		Message: "Your email address has been successfully updated.",
+	return map[string]interface{}{
+		"success": true,
+		"message": "Your email address has been successfully updated.",
 	}
 
 }
