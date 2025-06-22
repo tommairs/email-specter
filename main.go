@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"email-specter/config"
+	"email-specter/database"
 	"email-specter/task"
 	"email-specter/web/account"
 	"email-specter/web/middleware"
@@ -131,7 +132,7 @@ func runScheduler(shutdownCtx context.Context) {
 }
 
 func boot() {
-	go task.CreateIndexes()
+	database.CreateDatabaseConnections()
 }
 
 func main() {
