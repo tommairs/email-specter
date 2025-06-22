@@ -129,9 +129,7 @@ func runScheduler(shutdownCtx context.Context) {
 }
 
 func boot() {
-
-	// Any bootstrapping logic goes here.
-
+	go task.CreateIndexes()
 }
 
 func main() {
