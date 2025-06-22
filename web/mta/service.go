@@ -67,10 +67,13 @@ func addMTA(name string) map[string]interface{} {
 		}
 	}
 
+	id := primitive.NewObjectID()
+
 	mta := model.MTA{
-		ID:          primitive.NewObjectID(),
-		Name:        name,
-		SecretToken: secretToken,
+		ID:            id,
+		Name:          name,
+		SecretToken:   secretToken,
+		CollectionUrl: config.BackendUrl + "webhook/" + id.Hex() + "/" + secretToken,
 	}
 
 	collection := database.MongoConn.Collection("mtas")

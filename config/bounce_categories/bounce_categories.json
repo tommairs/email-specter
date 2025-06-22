@@ -268,7 +268,8 @@
     "^\\d{3}[ \\-]+5\\.3\\.1\b",
     "^452\b",
     "^552\b",
-    "(?i)^user quota exceeded$"
+    "(?i)^user quota exceeded$",
+    "(?i)\bout of storage\b"
   ],
   "envelope": [
     "^451[ \\-]+4\\.3\\.5\\s+Server configuration problem",
