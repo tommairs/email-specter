@@ -25,27 +25,32 @@ type BounceCategories struct {
 	Other     []regexp2.Regexp `json:"other"`
 }
 
-func (b *BounceCategories) GetCategories() map[string][]regexp2.Regexp {
-	
-	return map[string][]regexp2.Regexp{
-		"Blacklist": b.Blacklist,
-		"Greylist":  b.Greylist,
-		"Spam":      b.Spam,
-		"RateLimit": b.RateLimit,
-		"Block":     b.Block,
-		"Virus":     b.Virus,
-		"Recipient": b.Recipient,
-		"Message":   b.Message,
-		"Config":    b.Config,
-		"Sender":    b.Sender,
-		"Dmarc":     b.Dmarc,
-		"Policy":    b.Policy,
-		"Capacity":  b.Capacity,
-		"Envelope":  b.Envelope,
-		"Network":   b.Network,
-		"Protocol":  b.Protocol,
-		"Auth":      b.Auth,
-		"Other":     b.Other,
+type CategoryEntry struct {
+	Name     string
+	Patterns []regexp2.Regexp
+}
+
+func (b *BounceCategories) GetCategories() []CategoryEntry {
+
+	return []CategoryEntry{
+		{"Blacklist", b.Blacklist},
+		{"Greylist", b.Greylist},
+		{"Spam", b.Spam},
+		{"RateLimit", b.RateLimit},
+		{"Block", b.Block},
+		{"Virus", b.Virus},
+		{"Recipient", b.Recipient},
+		{"Message", b.Message},
+		{"Config", b.Config},
+		{"Sender", b.Sender},
+		{"Dmarc", b.Dmarc},
+		{"Policy", b.Policy},
+		{"Capacity", b.Capacity},
+		{"Envelope", b.Envelope},
+		{"Network", b.Network},
+		{"Protocol", b.Protocol},
+		{"Auth", b.Auth},
+		{"Other", b.Other},
 	}
 
 }
