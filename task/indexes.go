@@ -6,7 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"time"
 )
 
 func CreateIndexes() {
@@ -15,9 +14,6 @@ func CreateIndexes() {
 }
 
 func ensureMessagesIndex() {
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 
 	collection := database.MongoConn.Collection("messages")
 
@@ -37,7 +33,7 @@ func ensureMessagesIndex() {
 		{Keys: bson.D{{Key: "updated_at", Value: -1}}},
 	}
 
-	_, _ = collection.Indexes().CreateMany(ctx, indexModels)
+	_, _ = collection.Indexes().CreateMany(context.Background(), indexModels)
 
 }
 
