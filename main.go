@@ -119,6 +119,8 @@ func runScheduler(shutdownCtx context.Context) {
 	}
 
 	handleScheduleError(s.NewJob(gocron.DurationJob(1*time.Hour), gocron.NewTask(task.CleanLoginTokens)))
+	handleScheduleError(s.NewJob(gocron.DurationJob(1*time.Hour), gocron.NewTask(task.CleanMessages)))
+	handleScheduleError(s.NewJob(gocron.DurationJob(24*time.Hour), gocron.NewTask(task.CleanAggregatedData)))
 
 	s.Start()
 	<-shutdownCtx.Done()

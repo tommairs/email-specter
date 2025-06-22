@@ -1,6 +1,7 @@
 package config
 
 import (
+	"email-specter/util"
 	"github.com/joho/godotenv"
 	"os"
 	"time"
@@ -40,8 +41,8 @@ func loadConfig() {
 	HttpPort = os.Getenv("HTTP_PORT")
 	ListenAddress = os.Getenv("LISTEN_ADDRESS")
 
-	LogRetentionPeriod, _ = time.ParseDuration(os.Getenv("LOG_RETENTION_PERIOD"))
-	DataRetentionPeriod, _ = time.ParseDuration(os.Getenv("DATA_RETENTION_PERIOD"))
+	LogRetentionPeriod, _ = util.ParseDuration(os.Getenv("LOG_RETENTION_PERIOD"))
+	DataRetentionPeriod, _ = util.ParseDuration(os.Getenv("DATA_RETENTION_PERIOD"))
 
 }
 

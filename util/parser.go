@@ -3,6 +3,9 @@ package util
 import (
 	"encoding/json"
 	"github.com/gofiber/fiber/v2"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func ParseBodyRequest[T any](c *fiber.Ctx, request *T) error {
@@ -26,5 +29,35 @@ func ParseJson(jsonStr string) (map[string]interface{}, error) {
 	}
 
 	return result, nil
+
+}
+
+func ParseDuration(s string) (time.Duration, error) {
+
+	if strings.HasSuffix(s, "d") {
+
+		daysStr := strings.TrimSuffix(s, "d")
+		days, err := strconv.Atoi(daysStr)
+
+		if err != nil {
+			return 0, err
+		}
+
+		return time.Duration(days) * 24 * time.Hour, nil
+
+	} else if strings.HasSuffix(s, "y") {
+
+		yearsStr := strings.TrimSuffix(s, "y")
+		years, err := strconv.Atoi(yearsStr)
+
+		if err != nil {
+			return 0, err
+		}
+
+		return time.Duration(years) * 365 * 24 * time.Hour, nil
+
+	}
+
+	return time.ParseDuration(s)
 
 }
