@@ -11,9 +11,9 @@ import (
 
 const secretTokenLength = 64
 
-var collection = database.MongoConn.Collection("mtas")
-
 func getAllMTAs() map[string]interface{} {
+
+	collection := database.MongoConn.Collection("mtas")
 
 	cursor, err := collection.Find(context.Background(), primitive.M{})
 
@@ -73,6 +73,8 @@ func addMTA(name string) map[string]interface{} {
 		SecretToken: secretToken,
 	}
 
+	collection := database.MongoConn.Collection("mtas")
+
 	_, err = collection.InsertOne(context.Background(), mta)
 
 	if err != nil {
@@ -111,6 +113,8 @@ func editMTA(mtaID string, name string) map[string]interface{} {
 		},
 	}
 
+	collection := database.MongoConn.Collection("mtas")
+
 	result, err := collection.UpdateOne(context.Background(), primitive.M{"_id": objectID}, update)
 
 	if err != nil || result.ModifiedCount == 0 {
@@ -141,6 +145,8 @@ func deleteMTA(mtaID string) map[string]interface{} {
 		}
 
 	}
+
+	collection := database.MongoConn.Collection("mtas")
 
 	result, err := collection.DeleteOne(context.Background(), primitive.M{"_id": objectID})
 
@@ -189,6 +195,8 @@ func rotateSecretToken(mtaID string) map[string]interface{} {
 			"secret_token": secretToken,
 		},
 	}
+
+	collection := database.MongoConn.Collection("mtas")
 
 	result, err := collection.UpdateOne(context.Background(), primitive.M{"_id": objectID}, update)
 

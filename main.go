@@ -145,7 +145,8 @@ func main() {
 
 	defer signal.Stop(signalChan)
 
-	go boot()
+	boot()
+	
 	go runScheduler(shutdownCtx)
 	go runWebserver(shutdownCtx)
 
