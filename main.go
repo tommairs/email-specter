@@ -133,6 +133,7 @@ func runScheduler(shutdownCtx context.Context) {
 
 func boot() {
 	database.CreateDatabaseConnections()
+	task.CreateIndexes()
 }
 
 func main() {
@@ -146,7 +147,7 @@ func main() {
 	defer signal.Stop(signalChan)
 
 	boot()
-	
+
 	go runScheduler(shutdownCtx)
 	go runWebserver(shutdownCtx)
 
