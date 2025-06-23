@@ -6,6 +6,7 @@ import (
 	"email-specter/database"
 	"email-specter/task"
 	"email-specter/web/account"
+	"email-specter/web/data"
 	"email-specter/web/middleware"
 	"email-specter/web/mta"
 	"email-specter/web/webhook"
@@ -75,6 +76,11 @@ func runWebserver(shutdownCtx context.Context) {
 	// Webhook Collector
 
 	app.Post("/webhook/:id/:token", webhook.ProcessWebhook)
+
+	// Get Data
+
+	app.Get("/aggregated-data", middleware.OnlyAuthenticatedUsers, data.GetAggregatedDataRange)
+	app.Get("/bounce-data", middleware.OnlyAuthenticatedUsers, data.GetBounceDataRange)
 
 	// Not Found Handler
 

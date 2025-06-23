@@ -46,7 +46,7 @@ func CleanMessages() error {
 
 func CleanAggregatedData() error {
 
-	collection := database.MongoConn.Collection("aggregated_data")
+	collection := database.MongoConn.Collection("data")
 
 	filter := bson.M{
 		"date": bson.M{"$lt": time.Now().Add(-config.DataRetentionPeriod).Format("2006-01-02")},

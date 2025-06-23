@@ -4,6 +4,7 @@ import (
 	"net"
 	"net/mail"
 	"net/url"
+	"time"
 )
 
 func ValidateEmail(email string) bool {
@@ -66,4 +67,9 @@ func IsValidCIDR(cidr string) bool {
 
 	return true
 
+}
+
+func ValidateDate(date string) bool {
+	_, err := time.Parse("2006-01-02", date)
+	return err == nil
 }
