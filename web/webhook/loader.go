@@ -5,32 +5,19 @@ import (
 	"encoding/json"
 	"github.com/dlclark/regexp2"
 	"os"
-	"reflect"
 	"regexp"
 	"strings"
 )
 
-const bounceClassificationsPath = "config/bounce_categories/bounce_categories.json"
+const bounceClassificationsPath = "config/bounce_categories/bounces.txt"
 const serviceProvidersSeedListPath = "config/service_providers/service_providers.json"
 
 var ServiceProviders []model.ServiceProvider
-var BounceCategories model.BounceCategories
+var BounceCategories []model.BounceTypeEntry
 
 func init() {
 	loadServiceProviders()
 	loadBounceCategories()
-}
-
-func toFieldName(key string) string {
-
-	parts := strings.Split(key, "_")
-
-	for i, part := range parts {
-		parts[i] = strings.Title(part)
-	}
-
-	return strings.Join(parts, "")
-
 }
 
 func loadBounceCategories() {
@@ -41,47 +28,31 @@ func loadBounceCategories() {
 		panic("Failed to read bounce classifications: " + err.Error())
 	}
 
-	var raw map[string][]string
+	lines := strings.Split(string(contents), "\n")
 
-	err = json.Unmarshal(contents, &raw)
+	for _, line := range lines {
 
-	if err != nil {
-		panic("Failed to parse bounce classifications: " + err.Error())
-	}
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		
+		parts := strings.SplitN(line, ",", 4)
 
-	var result model.BounceCategories
-
-	val := reflect.ValueOf(&result).Elem()
-
-	for key, patterns := range raw {
-
-		fieldName := toFieldName(key)
-
-		field := val.FieldByName(fieldName)
-
-		if !field.IsValid() || !field.CanSet() {
-			panic("Unknown or unassignable field: " + fieldName)
+		if len(parts) < 4 {
+			panic("Invalid bounce classification line: " + line)
 		}
 
-		var compiled []regexp2.Regexp
+		regex := strings.TrimSpace(parts[0])
+		_ = strings.TrimSpace(parts[1])
+		category := strings.TrimSpace(parts[2])
+		_ = strings.TrimSpace(parts[3])
 
-		for _, pattern := range patterns {
-
-			re, err := regexp2.Compile(pattern, 0)
-
-			if err != nil {
-				panic("Invalid regex in " + key + ": " + err.Error())
-			}
-
-			compiled = append(compiled, *re)
-
-		}
-
-		field.Set(reflect.ValueOf(compiled))
+		BounceCategories = append(BounceCategories, model.BounceTypeEntry{
+			CompiledRegex: regexp2.MustCompile(regex, 0),
+			Category:      category,
+		})
 
 	}
-
-	BounceCategories = result
 
 }
 
