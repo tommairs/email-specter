@@ -35,7 +35,7 @@ func loadBounceCategories() {
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		
+
 		parts := strings.SplitN(line, ",", 4)
 
 		if len(parts) < 4 {
@@ -47,8 +47,14 @@ func loadBounceCategories() {
 		category := strings.TrimSpace(parts[2])
 		_ = strings.TrimSpace(parts[3])
 
+		compiledRegex, err := regexp2.Compile(regex, 0)
+
+		if err != nil {
+			panic("Failed to compile regex in bounce classification: " + err.Error() + " for line: " + line)
+		}
+
 		BounceCategories = append(BounceCategories, model.BounceTypeEntry{
-			CompiledRegex: regexp2.MustCompile(regex, 0),
+			CompiledRegex: compiledRegex,
 			Category:      category,
 		})
 
