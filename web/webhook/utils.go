@@ -98,12 +98,18 @@ func categorizeBounce(webhookData model.WebhookEvent) string {
 
 	for _, entry := range BounceCategories {
 
-		if entry.CompiledRegex.MatchString(bounceMessage) {
+		match, err := entry.CompiledRegex.MatchString(bounceMessage)
+
+		if err != nil {
+			continue
+		}
+
+		if match {
 			return entry.Category
 		}
 
 	}
 
-	return "Unknown"
+	return "other"
 
 }

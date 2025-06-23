@@ -32,6 +32,8 @@ func loadBounceCategories() {
 
 	for _, line := range lines {
 
+		line = strings.TrimSpace(line)
+
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
