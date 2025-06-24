@@ -5,7 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetAggregatedDataRange(c *fiber.Ctx) error {
+func GetAggregatedData(c *fiber.Ctx) error {
 
 	from := c.Query("from")
 	to := c.Query("to")
@@ -50,22 +50,33 @@ func GetAggregatedDataRange(c *fiber.Ctx) error {
 
 }
 
-func GetBounceDataRange(c *fiber.Ctx) error {
+type ReportRequest struct {
+	From                       string `json:"from"`
+	To                         string `json:"to"`
+	SourceIP                   string `json:"source_ip"`
+	SourceDomain               string `json:"source_domain"`
+	DestinationDomain          string `json:"destination_domain"`
+	DestinationService         string `json:"destination_service"`
+	KumoMtaClassification      string `json:"kumo_mta_classification"`
+	EmailSpecterClassification string `json:"email_specter_classification"`
+	EventType                  string `json:"event_type"`
+	GroupBy                    string `json:"group_by"`
+}
 
-	from := c.Query("from")
-	to := c.Query("to")
+func GenerateReport(c *fiber.Ctx) error {
 
-	if from == "" || to == "" {
+	var request ReportRequest
 
-		return c.JSON(fiber.Map{
+	if err := util.ParseBodyRequest(c, &request); err != nil {
+
+		return c.JSON(map[string]interface{}{
 			"success": false,
-			"message": "Both 'from' and 'to' query parameters are required.",
-			"data":    nil,
+			"message": util.FormatError(err),
 		})
 
 	}
 
-	if util.ValidateDate(from) == false || util.ValidateDate(to) == false {
+	if util.ValidateDate(request.From) == false || util.ValidateDate(request.To) == false {
 
 		return c.JSON(fiber.Map{
 			"success": false,
@@ -75,17 +86,57 @@ func GetBounceDataRange(c *fiber.Ctx) error {
 
 	}
 
-	data := GetBounceDataByRange(from, to)
+	data := filterData(request)
 
-	if data == nil {
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "",
+		"data":    data,
+	})
+
+}
+
+type ProviderDataRequest struct {
+	From               string `json:"from"`
+	To                 string `json:"to"`
+	DestinationDomain  string `json:"destination_domain"`
+	DestinationService string `json:"destination_service"`
+}
+
+func GetProviderData(c *fiber.Ctx) error {
+
+	var request ProviderDataRequest
+
+	if err := util.ParseBodyRequest(c, &request); err != nil {
+
+		return c.JSON(map[string]interface{}{
+			"success": false,
+			"message": util.FormatError(err),
+		})
+
+	}
+
+	if util.ValidateDate(request.From) == false || util.ValidateDate(request.To) == false {
 
 		return c.JSON(fiber.Map{
 			"success": false,
-			"message": "No data found for the specified date range.",
+			"message": "Invalid date format. Please use YYYY-MM-DD.",
 			"data":    nil,
 		})
 
 	}
+
+	if request.DestinationDomain == "" && request.DestinationService == "" {
+
+		return c.JSON(fiber.Map{
+			"success": false,
+			"message": "Either 'destination_domain' or 'destination_service' must be provided.",
+			"data":    nil,
+		})
+
+	}
+
+	data := getProviderData(request)
 
 	return c.JSON(fiber.Map{
 		"success": true,

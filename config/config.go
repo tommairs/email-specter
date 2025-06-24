@@ -33,7 +33,7 @@ func loadConfig() {
 	MongoConnStr = os.Getenv("MONGO_CONN_STR")
 	MongoDb = os.Getenv("MONGO_DB")
 
-	SessionLength, _ = time.ParseDuration(os.Getenv("SESSION_LENGTH"))
+	SessionLength, _ = util.ParseDuration(os.Getenv("SESSION_LENGTH"))
 
 	FrontendUrl = os.Getenv("FRONTEND_URL")
 

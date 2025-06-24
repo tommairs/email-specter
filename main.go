@@ -79,8 +79,9 @@ func runWebserver(shutdownCtx context.Context) {
 
 	// Get Data
 
-	app.Get("/aggregated-data", middleware.OnlyAuthenticatedUsers, data.GetAggregatedDataRange)
-	app.Get("/bounce-data", middleware.OnlyAuthenticatedUsers, data.GetBounceDataRange)
+	app.Get("/reports/aggregated-data", middleware.OnlyAuthenticatedUsers, data.GetAggregatedData)
+	app.Post("/reports/generate", middleware.OnlyAuthenticatedUsers, data.GenerateReport)
+	app.Post("/reports/provider-event-data", middleware.OnlyAuthenticatedUsers, data.GetProviderData)
 
 	// Not Found Handler
 
