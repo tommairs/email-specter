@@ -27,6 +27,8 @@ func updateMessageStatus(webhookData model.WebhookEvent, message *model.Message,
 
 	}
 
+	message.DestinationService = getServiceName(webhookData.PeerAddress.Name, message.SourceDomain)
+
 	result := message.Save() == nil
 
 	if result {

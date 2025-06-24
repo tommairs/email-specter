@@ -1,6 +1,6 @@
 [
   {
-    "regex": ".*\\.google\\.com$",
+    "regex": "(?i)^(gmail\\.com|.*\\.google\\.com)$",
     "name": "Gmail"
   },
   {
