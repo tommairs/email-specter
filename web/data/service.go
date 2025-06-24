@@ -248,3 +248,88 @@ func getProviderData(requestData ProviderDataRequest) map[string]map[string]int 
 	return aggregated
 
 }
+
+func getProviderClassificationData(requestData ProviderClassificationRequest) []map[string]interface{} {
+
+	collection := database.MongoConn.Collection("aggregated_statistics")
+
+	filter := bson.D{
+		{"date", bson.D{
+			{"$gte", requestData.From},
+			{"$lte", requestData.To},
+		}},
+		{
+			"event_type", requestData.EventType,
+		},
+	}
+
+	if requestData.DestinationDomain != "" {
+		filter = append(filter, bson.E{Key: "destination_domain", Value: requestData.DestinationDomain})
+	}
+
+	if requestData.DestinationService != "" {
+		filter = append(filter, bson.E{Key: "destination_service", Value: requestData.DestinationService})
+	}
+
+	cursor, err := collection.Find(context.TODO(), filter)
+
+	if err != nil {
+		log.Println("Aggregation error:", err)
+		return nil
+	}
+
+	defer cursor.Close(context.TODO())
+
+	var results []map[string]interface{}
+
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		return nil
+	}
+
+	// Group results by both kumo_mta_classification and email_specter_classification
+
+	grouped := make(map[string]map[string]int)
+
+	for _, result := range results {
+
+		kumoClassification := result["kumo_mta_classification"].(string)
+		emailClassification := result["email_specter_classification"].(string)
+
+		count := util.EnforceInt(result["count"])
+
+		if _, ok := grouped["kumo_mta_classification"]; !ok {
+			grouped["kumo_mta_classification"] = make(map[string]int)
+		}
+
+		if _, ok := grouped["email_specter_classification"]; !ok {
+			grouped["email_specter_classification"] = make(map[string]int)
+		}
+
+		grouped["kumo_mta_classification"][kumoClassification] += count
+		grouped["email_specter_classification"][emailClassification] += count
+
+	}
+
+	var finalResults []map[string]interface{}
+
+	for classificationType, classifications := range grouped {
+
+		for classification, count := range classifications {
+
+			finalResults = append(finalResults, map[string]interface{}{
+				"classification_type": classificationType,
+				"classification":      classification,
+				"count":               count,
+			})
+
+		}
+
+	}
+
+	sort.Slice(finalResults, func(i, j int) bool {
+		return finalResults[i]["classification"].(string) < finalResults[j]["classification"].(string)
+	})
+
+	return finalResults
+
+}

@@ -145,3 +145,52 @@ func GetProviderData(c *fiber.Ctx) error {
 	})
 
 }
+
+type ProviderClassificationRequest struct {
+	From               string `json:"from"`
+	To                 string `json:"to"`
+	EventType          string `json:"event_type"`
+	DestinationDomain  string `json:"destination_domain"`
+	DestinationService string `json:"destination_service"`
+}
+
+func GetProviderClassificationData(c *fiber.Ctx) error {
+
+	var request ProviderClassificationRequest
+
+	if err := util.ParseBodyRequest(c, &request); err != nil {
+
+		return c.JSON(map[string]interface{}{
+			"success": false,
+			"message": util.FormatError(err),
+		})
+
+	} else if util.ValidateDate(request.From) == false || util.ValidateDate(request.To) == false {
+
+		return c.JSON(fiber.Map{
+			"success": false,
+			"message": "Invalid date format. Please use YYYY-MM-DD.",
+			"data":    nil,
+		})
+
+	} else if request.EventType != "TransientFailure" && request.EventType != "Bounce" {
+
+		return c.JSON(fiber.Map{
+			"success": false,
+			"message": "Invalid event type. Allowed values are 'TransientFailure' or 'Bounce'.",
+			"data":    nil,
+		})
+
+	} else {
+
+		data := getProviderClassificationData(request)
+
+		return c.JSON(fiber.Map{
+			"success": true,
+			"message": "",
+			"data":    data,
+		})
+
+	}
+
+}

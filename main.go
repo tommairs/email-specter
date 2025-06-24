@@ -82,6 +82,7 @@ func runWebserver(shutdownCtx context.Context) {
 	app.Get("/reports/aggregated-data", middleware.OnlyAuthenticatedUsers, data.GetAggregatedData)
 	app.Post("/reports/generate", middleware.OnlyAuthenticatedUsers, data.GenerateReport)
 	app.Post("/reports/provider-event-data", middleware.OnlyAuthenticatedUsers, data.GetProviderData)
+	app.Post("/reports/provider-classification-data", middleware.OnlyAuthenticatedUsers, data.GetProviderClassificationData)
 
 	// Not Found Handler
 
