@@ -6,6 +6,7 @@ import (
 	"email-specter/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"sort"
 	"time"
@@ -335,19 +336,246 @@ func getProviderClassificationData(requestData ProviderClassificationRequest) []
 
 }
 
-func getTopEntities() []map[string]interface{} {
+func getDateRangeForLastMonth() (string, string) {
 
-	// TODO: Get TopN DestinationService (1,000), Source IPs (All), SourceDomain (Top 1,000), DestinationDomain (Top 1,000). Good to fill out the UI.
-	// Based on last 30 days of data
+	endDate := time.Now().Format("2006-01-02")
+	startDate := time.Now().AddDate(0, 0, -30).Format("2006-01-02")
+
+	return startDate, endDate
+
+}
+
+func aggregateEntityData(startDate, endDate, fieldName string, limit int, requireNonEmpty bool) []string {
 
 	collection := database.MongoConn.Collection("aggregated_statistics")
 
 	matchStage := bson.D{
-		{"$match", bson.D{
-			{"date", bson.D{
-				{"$gte", time.Now().Add(-time.Hour * 24 * 30)},
-			}},
+		{"date", bson.D{
+			{"$gte", startDate},
+			{"$lte", endDate},
 		}},
+	}
+
+	if requireNonEmpty {
+
+		matchStage = append(matchStage, bson.E{
+			Key:   fieldName,
+			Value: bson.D{{"$ne", ""}},
+		})
+
+	}
+
+	pipeline := mongo.Pipeline{
+		{{"$match", matchStage}},
+		{{"$group", bson.D{
+			{"_id", "$" + fieldName},
+			{"count", bson.D{{"$sum", "$count"}}},
+		}}},
+		{{"$sort", bson.D{
+			{"count", -1},
+		}}},
+	}
+
+	if limit > 0 {
+		pipeline = append(pipeline, bson.D{{"$limit", limit}})
+	}
+
+	cursor, err := collection.Aggregate(context.TODO(), pipeline)
+
+	if err != nil {
+		return nil
+	}
+
+	defer cursor.Close(context.TODO())
+
+	type aggregationResult struct {
+		ID    string `bson:"_id"`
+		Count int    `bson:"count"`
+	}
+
+	var rawResults []aggregationResult
+
+	if err = cursor.All(context.TODO(), &rawResults); err != nil {
+		return nil
+	}
+
+	results := make([]string, 0, len(rawResults))
+
+	for _, item := range rawResults {
+
+		if item.ID != "" {
+			results = append(results, item.ID)
+		}
+
+	}
+
+	return results
+
+}
+
+func getTopEntities() map[string]interface{} {
+
+	startDate, endDate := getDateRangeForLastMonth()
+
+	result := make(map[string]interface{})
+
+	entityConfigs := []struct {
+		resultKey       string
+		fieldName       string
+		limit           int
+		requireNonEmpty bool
+	}{
+		{"destination_services", "destination_service", 1000, true},
+		{"source_ips", "source_ip", 0, true},
+		{"source_domains", "source_domain", 1000, true},
+		{"destination_domains", "destination_domain", 1000, true},
+	}
+
+	for _, config := range entityConfigs {
+
+		if data := aggregateEntityData(startDate, endDate, config.fieldName, config.limit, config.requireNonEmpty); data != nil && len(data) > 0 {
+			result[config.resultKey] = data
+		}
+
+	}
+
+	return result
+
+}
+
+func buildMessageFilter(request GetMessagesRequest) bson.D {
+
+	filter := bson.D{}
+
+	if request.From != "" || request.To != "" {
+
+		dateRange := bson.D{}
+
+		if request.From != "" {
+			dateRange = append(dateRange, bson.E{Key: "$gte", Value: util.ConvertYmdToTime(request.From)})
+		}
+
+		if request.To != "" {
+			toTime := util.ConvertYmdToTime(request.To).Add(23*time.Hour + 59*time.Minute + 59*time.Second + 999*time.Millisecond)
+			dateRange = append(dateRange, bson.E{Key: "$lte", Value: toTime})
+		}
+
+		filter = append(filter, bson.E{Key: "updated_at", Value: dateRange})
+
+	}
+
+	if request.MtaId > 0 {
+		filter = append(filter, bson.E{Key: "mta_id", Value: request.MtaId})
+	}
+
+	if request.SourceIP != "" {
+		filter = append(filter, bson.E{Key: "source_ip", Value: request.SourceIP})
+	}
+
+	if request.SourceDomain != "" {
+		filter = append(filter, bson.E{Key: "source_domain", Value: request.SourceDomain})
+	}
+
+	if request.DestinationService != "" {
+		filter = append(filter, bson.E{Key: "destination_service", Value: request.DestinationService})
+	}
+
+	if request.DestinationDomain != "" {
+		filter = append(filter, bson.E{Key: "destination_domain", Value: request.DestinationDomain})
+	}
+
+	if request.LastStatus != "" {
+		filter = append(filter, bson.E{Key: "last_status", Value: request.LastStatus})
+	}
+
+	if request.EmailSpecterBounceClassification != "" {
+		filter = append(filter, bson.E{Key: "email_specter_bounce_classification", Value: request.EmailSpecterBounceClassification})
+	}
+
+	if request.KumoMtaBounceClassification != "" {
+		filter = append(filter, bson.E{Key: "kumo_mta_bounce_classification", Value: request.KumoMtaBounceClassification})
+	}
+
+	return filter
+
+}
+
+func countMessages(filter bson.D) int64 {
+
+	collection := database.MongoConn.Collection("messages")
+
+	totalCount, err := collection.CountDocuments(context.TODO(), filter)
+
+	if err != nil {
+		log.Println("Error counting messages:", err)
+		return 0
+	}
+
+	return totalCount
+
+}
+
+func getMessages(request GetMessagesRequest) map[string]interface{} {
+
+	collection := database.MongoConn.Collection("messages")
+
+	filter := buildMessageFilter(request)
+
+	totalCount := countMessages(filter)
+
+	const messagesPerPage = 100
+
+	page := request.Page
+
+	if page < 1 {
+		page = 1
+	}
+
+	skip := (page - 1) * messagesPerPage
+	totalPages := (totalCount + messagesPerPage - 1) / messagesPerPage
+
+	findOptions := options.Find()
+	findOptions.SetLimit(messagesPerPage)
+	findOptions.SetSkip(int64(skip))
+	findOptions.SetSort(bson.D{{"updated_at", -1}})
+
+	cursor, err := collection.Find(context.TODO(), filter, findOptions)
+
+	if err != nil {
+
+		log.Println("Error retrieving messages:", err)
+
+		return map[string]interface{}{
+			"messages":    []map[string]interface{}{},
+			"total_count": 0,
+			"page":        page,
+			"pages":       0,
+		}
+
+	}
+
+	defer cursor.Close(context.TODO())
+
+	var messages []map[string]interface{}
+
+	if err = cursor.All(context.TODO(), &messages); err != nil {
+
+		log.Println("Error retrieving messages:", err)
+
+		return map[string]interface{}{
+			"messages":    []map[string]interface{}{},
+			"total_count": 0,
+			"page":        page,
+			"pages":       0,
+		}
+
+	}
+
+	return map[string]interface{}{
+		"messages":    messages,
+		"total_count": totalCount,
+		"page":        page,
+		"pages":       totalPages,
 	}
 
 }

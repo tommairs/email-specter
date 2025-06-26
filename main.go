@@ -83,11 +83,9 @@ func runWebserver(shutdownCtx context.Context) {
 	app.Post("/reports/generate", middleware.OnlyAuthenticatedUsers, data.GenerateReport)
 	app.Post("/reports/provider-event-data", middleware.OnlyAuthenticatedUsers, data.GetProviderData)
 	app.Post("/reports/provider-classification-data", middleware.OnlyAuthenticatedUsers, data.GetProviderClassificationData)
-
-	// TODO: Message Log (With Pagination & Filtering)
-	// TODO: Get TopN DestinationService (1,000), Source IPs (All), SourceDomain (Top 1,000), DestinationDomain (Top 1,000). Good to fill out the UI.
-
+	
 	app.Get("/reports/top-entities", middleware.OnlyAuthenticatedUsers, data.GetTopEntities)
+	app.Post("/messages", middleware.OnlyAuthenticatedUsers, data.GetMessages)
 
 	// Not Found Handler
 

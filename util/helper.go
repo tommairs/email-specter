@@ -144,6 +144,18 @@ func GetHourString(t time.Time) string {
 
 }
 
+func ConvertYmdToTime(ymd string) time.Time {
+
+	t, err := time.Parse("2006-01-02", ymd)
+
+	if err != nil {
+		return time.Time{}
+	}
+
+	return t
+
+}
+
 func GetClampedPageNumber(page int, totalPages int) int {
 
 	if page < 1 {

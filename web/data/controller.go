@@ -206,3 +206,54 @@ func GetTopEntities(c *fiber.Ctx) error {
 	})
 
 }
+
+type GetMessagesRequest struct {
+	From                             string `json:"from"`
+	To                               string `json:"to"`
+	MtaId                            int    `json:"mta_id"`
+	SourceIP                         string `json:"source_ip"`
+	SourceDomain                     string `json:"source_domain"`
+	DestinationService               string `json:"destination_service"`
+	DestinationDomain                string `json:"destination_domain"`
+	LastStatus                       string `json:"last_status"`
+	EmailSpecterBounceClassification string `json:"email_specter_bounce_classification"`
+	KumoMtaBounceClassification      string `json:"kumo_mta_bounce_classification"`
+	Page                             int    `json:"page"`
+}
+
+func GetMessages(c *fiber.Ctx) error {
+
+	var request GetMessagesRequest
+
+	if err := util.ParseBodyRequest(c, &request); err != nil {
+
+		return c.JSON(map[string]interface{}{
+			"success": false,
+			"message": util.FormatError(err),
+		})
+
+	}
+
+	if (request.From != "" && util.ValidateDate(request.From) == false) || (request.To != "" && util.ValidateDate(request.To) == false) {
+
+		return c.JSON(fiber.Map{
+			"success": false,
+			"message": "If 'from' or 'to' is provided, they must be in the format YYYY-MM-DD.",
+			"data":    nil,
+		})
+
+	}
+
+	if request.Page < 1 {
+		request.Page = 1
+	}
+
+	data := getMessages(request)
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "",
+		"data":    data,
+	})
+
+}
