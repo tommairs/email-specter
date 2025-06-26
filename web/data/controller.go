@@ -194,3 +194,15 @@ func GetProviderClassificationData(c *fiber.Ctx) error {
 	}
 
 }
+
+func GetTopEntities(c *fiber.Ctx) error {
+
+	data := getTopEntities()
+
+	return c.JSON(fiber.Map{
+		"success": true,
+		"message": "",
+		"data":    data,
+	})
+
+}

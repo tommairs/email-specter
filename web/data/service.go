@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
 	"sort"
+	"time"
 )
 
 func GetAggregatedDataByRange(from string, to string) []map[string]interface{} {
@@ -331,5 +332,22 @@ func getProviderClassificationData(requestData ProviderClassificationRequest) []
 	})
 
 	return finalResults
+
+}
+
+func getTopEntities() []map[string]interface{} {
+
+	// TODO: Get TopN DestinationService (1,000), Source IPs (All), SourceDomain (Top 1,000), DestinationDomain (Top 1,000). Good to fill out the UI.
+	// Based on last 30 days of data
+
+	collection := database.MongoConn.Collection("aggregated_statistics")
+
+	matchStage := bson.D{
+		{"$match", bson.D{
+			{"date", bson.D{
+				{"$gte", time.Now().Add(-time.Hour * 24 * 30)},
+			}},
+		}},
+	}
 
 }
