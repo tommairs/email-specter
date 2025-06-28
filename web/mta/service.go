@@ -43,7 +43,7 @@ func getAllMTAs() map[string]interface{} {
 			ID:            mta.ID,
 			Name:          mta.Name,
 			SecretToken:   mta.SecretToken,
-			CollectionUrl: config.BackendUrl + "webhook/" + mta.ID.Hex() + "/" + mta.SecretToken,
+			CollectionUrl: config.BackendUrl + "api/webhook/" + mta.ID.Hex() + "/" + mta.SecretToken,
 		}
 
 	}
@@ -73,7 +73,7 @@ func addMTA(name string) map[string]interface{} {
 		ID:            id,
 		Name:          name,
 		SecretToken:   secretToken,
-		CollectionUrl: config.BackendUrl + "webhook/" + id.Hex() + "/" + secretToken,
+		CollectionUrl: config.BackendUrl + "api/webhook/" + id.Hex() + "/" + secretToken,
 	}
 
 	collection := database.MongoConn.Collection("mtas")

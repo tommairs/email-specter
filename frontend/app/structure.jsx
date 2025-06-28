@@ -46,7 +46,9 @@ export default function Structure({children}) {
                             </li>
 
                             <li className="nav-item">
-                                <a className="nav-link" href="#">Features</a>
+                                <Link className="nav-link" href="/connections">
+                                    Connections
+                                </Link>
                             </li>
 
                             <li className="nav-item">
@@ -99,14 +101,17 @@ export default function Structure({children}) {
             <footer className="bg-dark text-white mt-4">
                 <div className="container">
                     <div className="d-flex justify-content-lg-between p-4">
+
                         <p className="mb-0">
                             Released under the MIT License
                         </p>
+
                         <p className="mb-0">
                             <Link href="https://github.com/maileroo/email-specter" className="text-white text-decoration-none me-3">
                                 View on GitHub
                             </Link>
                         </p>
+
                     </div>
                 </div>
             </footer>
