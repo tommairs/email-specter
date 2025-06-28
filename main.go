@@ -12,6 +12,7 @@ import (
 	"email-specter/web/webhook"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"log"
 	"os"
 	"os/signal"
@@ -28,9 +29,11 @@ func runWebserver(shutdownCtx context.Context) {
 		BodyLimit: maxBodySize,
 	})
 
-	app.Use(func(c *fiber.Ctx) error {
+	app.Use(logger.New())
 
-		// Maybe replace with this an actual domain name later.
+	// CORS Middleware
+
+	app.Use(func(c *fiber.Ctx) error {
 
 		c.Set("Access-Control-Allow-Origin", "*")
 		c.Set("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
@@ -44,7 +47,9 @@ func runWebserver(shutdownCtx context.Context) {
 
 	})
 
-	app.Get("/", func(c *fiber.Ctx) error {
+	api := app.Group("/api")
+
+	api.Get("/", func(c *fiber.Ctx) error {
 
 		return c.JSON(fiber.Map{
 			"success": true,
@@ -53,43 +58,31 @@ func runWebserver(shutdownCtx context.Context) {
 
 	})
 
-	// Has the admin user been created?
+	api.Get("/can-register", account.CanRegister)
+	api.Post("/register", account.Register)
+	api.Post("/login", account.Login)
+	api.Get("/account", middleware.OnlyAuthenticatedUsers, account.GetAccount)
+	api.Patch("/account/change-full-name", middleware.OnlyAuthenticatedUsers, account.ChangeFullName)
+	api.Patch("/account/change-password", middleware.OnlyAuthenticatedUsers, account.ChangePassword)
+	api.Patch("/account/change-email", middleware.OnlyAuthenticatedUsers, account.ChangeEmail)
+	api.Post("/logout", middleware.OnlyAuthenticatedUsers, account.Logout)
 
-	app.Get("/can-register", account.CanRegister)
+	api.Get("/mta", middleware.OnlyAuthenticatedUsers, mta.GetAllMTAs)
+	api.Post("/mta", middleware.OnlyAuthenticatedUsers, mta.AddMTA)
+	api.Patch("/mta/:id", middleware.OnlyAuthenticatedUsers, mta.EditMTA)
+	api.Delete("/mta/:id", middleware.OnlyAuthenticatedUsers, mta.DeleteMTA)
+	api.Post("/mta/:id/rotate-secret-token", middleware.OnlyAuthenticatedUsers, mta.RotateSecretToken)
 
-	app.Post("/register", account.Register)
-	app.Post("/login", account.Login)
-	app.Get("/account", middleware.OnlyAuthenticatedUsers, account.GetAccount)
-	app.Patch("/account/change-full-name", middleware.OnlyAuthenticatedUsers, account.ChangeFullName)
-	app.Patch("/account/change-password", middleware.OnlyAuthenticatedUsers, account.ChangePassword)
-	app.Patch("/account/change-email", middleware.OnlyAuthenticatedUsers, account.ChangeEmail)
-	app.Post("/logout", middleware.OnlyAuthenticatedUsers, account.Logout)
+	api.Post("/webhook/:id/:token", webhook.ProcessWebhook)
 
-	// Add an MTA
+	api.Get("/reports/aggregated-data", middleware.OnlyAuthenticatedUsers, data.GetAggregatedData)
+	api.Post("/reports/generate", middleware.OnlyAuthenticatedUsers, data.GenerateReport)
+	api.Post("/reports/provider-event-data", middleware.OnlyAuthenticatedUsers, data.GetProviderData)
+	api.Post("/reports/provider-classification-data", middleware.OnlyAuthenticatedUsers, data.GetProviderClassificationData)
+	api.Get("/reports/top-entities", middleware.OnlyAuthenticatedUsers, data.GetTopEntities)
+	api.Post("/messages", middleware.OnlyAuthenticatedUsers, data.GetMessages)
 
-	app.Get("/mta", middleware.OnlyAuthenticatedUsers, mta.GetAllMTAs)
-	app.Post("/mta", middleware.OnlyAuthenticatedUsers, mta.AddMTA)
-	app.Patch("/mta/:id", middleware.OnlyAuthenticatedUsers, mta.EditMTA)
-	app.Delete("/mta/:id", middleware.OnlyAuthenticatedUsers, mta.DeleteMTA)
-	app.Post("/mta/:id/rotate-secret-token", middleware.OnlyAuthenticatedUsers, mta.RotateSecretToken)
-
-	// Webhook Collector
-
-	app.Post("/webhook/:id/:token", webhook.ProcessWebhook)
-
-	// Get Data
-
-	app.Get("/reports/aggregated-data", middleware.OnlyAuthenticatedUsers, data.GetAggregatedData)
-	app.Post("/reports/generate", middleware.OnlyAuthenticatedUsers, data.GenerateReport)
-	app.Post("/reports/provider-event-data", middleware.OnlyAuthenticatedUsers, data.GetProviderData)
-	app.Post("/reports/provider-classification-data", middleware.OnlyAuthenticatedUsers, data.GetProviderClassificationData)
-	
-	app.Get("/reports/top-entities", middleware.OnlyAuthenticatedUsers, data.GetTopEntities)
-	app.Post("/messages", middleware.OnlyAuthenticatedUsers, data.GetMessages)
-
-	// Not Found Handler
-
-	app.All("*", func(c *fiber.Ctx) error {
+	app.All("/api/*", func(c *fiber.Ctx) error {
 
 		return c.JSON(fiber.Map{
 			"success": false,
@@ -107,9 +100,7 @@ func runWebserver(shutdownCtx context.Context) {
 	}()
 
 	<-shutdownCtx.Done()
-
 	_ = app.Shutdown()
-
 	log.Println("Webserver shutting down...")
 
 }
