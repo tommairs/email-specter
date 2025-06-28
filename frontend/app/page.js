@@ -12,7 +12,7 @@ export default function Home() {
     const checkIfUserIsLoggedIn = async () => {
 
         if (isAuth) {
-            router.push('/dashboard');
+            router.push('/messages');
         } else {
             router.push('/auth/login');
         }

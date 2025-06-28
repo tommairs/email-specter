@@ -6,7 +6,7 @@ import {useUser} from "@/providers/UserProvider";
 
 export default function Structure({children}) {
 
-    const[isClient, setIsClient] = useState(false);
+    const [isClient, setIsClient] = useState(false);
 
     const {isAuth} = useUser();
 
@@ -40,23 +40,57 @@ export default function Structure({children}) {
                         <ul className="navbar-nav me-auto">
 
                             <li className="nav-item">
-                                <Link className="nav-link" href="/">
-                                    Home
-                                </Link>
-                            </li>
-
-                            <li className="nav-item">
                                 <Link className="nav-link" href="/connections">
                                     Connections
                                 </Link>
                             </li>
 
                             <li className="nav-item">
-                                <a className="nav-link" href="#">Pricing</a>
+                                <Link className="nav-link" href="/statistics">
+                                    Statistics
+                                </Link>
                             </li>
 
                             <li className="nav-item">
-                                <a className="nav-link" href="#">About</a>
+                                <Link className="nav-link" href="/reports">
+                                    Reports
+                                </Link>
+                            </li>
+
+                            <li className="nav-item dropdown">
+
+                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Provider Insights
+                                </a>
+
+                                <ul className="dropdown-menu">
+
+                                    <li>
+                                        <Link className="dropdown-item" href="/providers/event-statistics">
+                                            Event Statistics
+                                        </Link>
+                                    </li>
+
+                                    <li>
+                                        <Link className="dropdown-item" href="/providers/bounce-types">
+                                            Bounce Types
+                                        </Link>
+                                    </li>
+
+                                </ul>
+
+                            </li>
+
+                            <li className="nav-item">
+                                <Link className="nav-link" href="/top-entities">
+                                    Top Entities
+                                </Link>
+                            </li>
+
+                            <li className="nav-item">
+                                <Link className="nav-link" href="/messages">
+                                    Messages
+                                </Link>
                             </li>
 
                         </ul>

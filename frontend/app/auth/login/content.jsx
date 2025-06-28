@@ -47,7 +47,7 @@ export default function View() {
 
             refreshUser();
 
-            router.push('/dashboard');
+            router.push('/meessages');
 
         } else {
 
@@ -60,7 +60,7 @@ export default function View() {
     const checkIfUserIsLoggedIn = async () => {
 
         if (isAuth) {
-            router.push('/dashboard');
+            router.push('/messages');
         }
 
     };
