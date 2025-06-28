@@ -3,12 +3,14 @@
 import {useEffect, useState} from "react";
 import Link from "next/link";
 import {useUser} from "@/providers/UserProvider";
+import {usePathname} from "next/navigation";
 
 export default function Structure({children}) {
 
     const [isClient, setIsClient] = useState(false);
 
     const {isAuth} = useUser();
+    const pathname = usePathname();
 
     useEffect(() => {
         require('bootstrap/dist/js/bootstrap.bundle.js');
@@ -21,6 +23,10 @@ export default function Structure({children}) {
     if (!isClient) {
         return null;
     }
+
+    const matchRoute = (route, currentPath) => {
+        return currentPath.startsWith(route) ? ' active' : '';
+    };
 
     return (
         <>
@@ -40,26 +46,26 @@ export default function Structure({children}) {
                         <ul className="navbar-nav me-auto">
 
                             <li className="nav-item">
-                                <Link className="nav-link" href="/connections">
+                                <Link className={"nav-link " + matchRoute('/connections', pathname)} href="/connections">
                                     Connections
                                 </Link>
                             </li>
 
                             <li className="nav-item">
-                                <Link className="nav-link" href="/statistics">
+                                <Link className={"nav-link " + matchRoute('/statistics', pathname)} href="/statistics">
                                     Statistics
                                 </Link>
                             </li>
 
                             <li className="nav-item">
-                                <Link className="nav-link" href="/reports">
+                                <Link className={"nav-link " + matchRoute('/reports', pathname)} href="/reports">
                                     Reports
                                 </Link>
                             </li>
 
                             <li className="nav-item dropdown">
 
-                                <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a className={"nav-link dropdown-toggle" + matchRoute('/providers', pathname)} href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Provider Insights
                                 </a>
 
@@ -82,13 +88,13 @@ export default function Structure({children}) {
                             </li>
 
                             <li className="nav-item">
-                                <Link className="nav-link" href="/top-entities">
+                                <Link className={"nav-link " + matchRoute('/top-entities', pathname)} href="/top-entities">
                                     Top Entities
                                 </Link>
                             </li>
 
                             <li className="nav-item">
-                                <Link className="nav-link" href="/messages">
+                                <Link className={"nav-link " + matchRoute('/messages', pathname)} href="/messages">
                                     Messages
                                 </Link>
                             </li>
