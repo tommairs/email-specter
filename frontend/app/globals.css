@@ -23,3 +23,7 @@ main {
     padding-left: 0 !important;
     margin-bottom: 0 !important;
 }
+
+.bg-secondary {
+    background-color: #f8f9fa !important; /* Light gray background */
+}

@@ -227,8 +227,6 @@ function MessageTables({messages}) {
 
     const getDateTime = (rowData) => {
 
-        // updateD_at
-
         const date = new Date(rowData['updated_at']);
 
         const options = {
@@ -242,9 +240,75 @@ function MessageTables({messages}) {
         };
 
         const formattedDate = date.toLocaleString('en-US', options).replace(',', '');
-        
+
         return (
             <span className="font-medium">{formattedDate}</span>
+        );
+
+    };
+
+    const getStatus = (rowData) => {
+        const statusBadge = {
+            "Reception": "success",
+            "TransientFailure": "warning",
+            "Bounce": "danger",
+            "Delivery": "info"
+        }[rowData['last_status']] || "secondary";
+
+        return (
+            <div className={`badge bg-${statusBadge}`}>
+                {rowData['last_status']}
+            </div>
+        );
+
+    };
+
+    const showEventsModal = (events) => {
+
+        // Implement the logic to show events modal
+        // This could be a custom modal component that displays the events
+        // For now, we will just log the events to the console
+        console.log("Events:", events);
+
+    };
+
+    const getEvents = (rowData) => {
+
+        if (!rowData['events'] || rowData['events'].length === 0) {
+            return <span className="text-muted">N/A</span>;
+        }
+
+        return (
+            <button className="btn btn-sm btn-outline-secondary" onClick={() => showEventsModal(rowData['events'])}>
+                Events
+                <span className="badge bg-dark ms-2">
+                    {rowData['events'].length}
+                </span>
+            </button>
+        );
+
+    };
+
+    const getClassifications = (rowData) => {
+
+        if (rowData['last_status'] !== 'Bounce' && rowData['last_status'] !== 'TransientFailure') {
+            return <span className="text-muted">N/A</span>;
+        }
+
+        return (
+            <div className="flex flex-column fs-sm gap-1">
+
+                <span className="font-medium">
+                    <label className={`badge bg-dark`}>{rowData['email_specter_bounce_classification'] || 'N/A'}</label>
+                </span>
+
+                <br/>
+
+                <span className="font-medium">
+                    <label className={`badge bg-dark`}>{rowData['kumo_mta_bounce_classification'] || 'N/A'}</label>
+                </span>
+
+            </div>
         );
 
     };
@@ -254,7 +318,9 @@ function MessageTables({messages}) {
             <Column field="date" header="Date & Time" body={(rowData) => getDateTime(rowData)}/>
             <Column field="path" header="Path" body={(rowData) => getPath(rowData)}/>
             <Column field="ip_destination" header="IP Destination" body={(rowData) => getIPDestination(rowData)}/>
-            <Column field="ip_destination" header="IP Destination" body={(rowData) => getIPDestination(rowData)}/>
+            <Column field="status" header="Status" body={(rowData) => getStatus(rowData)}/>
+            <Column field="events" header="Events" body={(rowData) => getEvents(rowData)}/>
+            <Column field="classifications" header="Classifications" body={(rowData) => getClassifications(rowData)}/>
         </DataTable>
     );
 
