@@ -10,21 +10,11 @@ func GetAggregatedData(c *fiber.Ctx) error {
 	from := c.Query("from")
 	to := c.Query("to")
 
-	if from == "" || to == "" {
+	if (from != "" && util.ValidateDate(from) == false) || (to != "" && util.ValidateDate(to) == false) {
 
 		return c.JSON(fiber.Map{
 			"success": false,
-			"message": "Both 'from' and 'to' query parameters are required.",
-			"data":    nil,
-		})
-
-	}
-
-	if util.ValidateDate(from) == false || util.ValidateDate(to) == false {
-
-		return c.JSON(fiber.Map{
-			"success": false,
-			"message": "Invalid date format. Please use YYYY-MM-DD.",
+			"message": "When 'from' or 'to' is provided, they must be in the format YYYY-MM-DD.",
 			"data":    nil,
 		})
 

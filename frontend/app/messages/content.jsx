@@ -17,6 +17,7 @@ export default function Content() {
     const [loading, setLoading] = useState(true);
     const [messages, setMessages] = useState([]);
     const [flexClass, setFlexClass] = useState(false);
+    const [totalPages, setTotalPages] = useState(1);
 
     const [filters, setFilters] = useState({
         from: "",
@@ -52,6 +53,7 @@ export default function Content() {
 
         if (response.data.success) {
             setMessages(response.data.data.messages || []);
+            setTotalPages(response.data.data.pages || 1);
         } else {
             ToastHelper.errorToast(response.data.message || "We could not fetch messages. Please try again later.");
         }
@@ -79,8 +81,6 @@ export default function Content() {
             page: 1,
         });
 
-        fetchMessages();
-
     };
 
     const toggleFlexClass = () => {
@@ -94,10 +94,6 @@ export default function Content() {
         StorageHelper.set("flexClass", !flexClass);
 
     };
-
-    useEffect(() => {
-        fetchMessages();
-    }, []);
 
     useEffect(() => {
         StorageHelper.get("flexClass") === "true" ? setFlexClass(true) : setFlexClass(false);
@@ -174,8 +170,8 @@ export default function Content() {
 
                             <div className="d-flex justify-content-center align-items-center mt-4">
                                 <Pagination
-                                    currentPage={1}
-                                    totalPages={100}
+                                    currentPage={filters.page || 1}
+                                    totalPages={totalPages || 1}
                                     onPageChange={(page) => {
                                         setFilters(prev => ({...prev, page}));
                                     }}

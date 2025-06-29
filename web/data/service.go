@@ -13,16 +13,32 @@ import (
 )
 
 func GetAggregatedDataByRange(from string, to string) []map[string]interface{} {
-
+	
 	collection := database.MongoConn.Collection("aggregated_statistics")
 
-	matchStage := bson.D{
-		{"$match", bson.D{
-			{"date", bson.D{
-				{"$gte", from},
-				{"$lte", to},
-			}},
-		}},
+	matchStage := bson.D{}
+
+	if from != "" || to != "" {
+
+		dateRange := bson.D{}
+
+		if from != "" {
+			dateRange = append(dateRange, bson.E{Key: "$gte", Value: util.ConvertYmdToTime(from)})
+		}
+
+		if to != "" {
+			toTime := util.ConvertYmdToTime(to).Add(23*time.Hour + 59*time.Minute + 59*time.Second + 999*time.Millisecond)
+			dateRange = append(dateRange, bson.E{Key: "$lte", Value: toTime})
+		}
+
+		matchStage = append(matchStage, bson.E{Key: "date", Value: dateRange})
+
+	}
+
+	pipeline := mongo.Pipeline{}
+
+	if len(matchStage) > 0 {
+		pipeline = append(pipeline, bson.D{{"$match", matchStage}})
 	}
 
 	groupStage := bson.D{
@@ -41,7 +57,9 @@ func GetAggregatedDataByRange(from string, to string) []map[string]interface{} {
 		}},
 	}
 
-	cursor, err := collection.Aggregate(context.TODO(), mongo.Pipeline{matchStage, groupStage, sortStage})
+	pipeline = append(pipeline, groupStage, sortStage)
+
+	cursor, err := collection.Aggregate(context.TODO(), pipeline)
 
 	if err != nil {
 		log.Println("Aggregation error:", err)
@@ -55,6 +73,7 @@ func GetAggregatedDataByRange(from string, to string) []map[string]interface{} {
 			Date      string `bson:"date"`
 			EventType string `bson:"event_type"`
 		} `bson:"_id"`
+
 		Count int `bson:"count"`
 	}
 
@@ -65,6 +84,7 @@ func GetAggregatedDataByRange(from string, to string) []map[string]interface{} {
 	grouped := make(map[string][]map[string]interface{})
 
 	for _, r := range rawResults {
+
 		grouped[r.ID.Date] = append(grouped[r.ID.Date], map[string]interface{}{
 			"event_type": r.ID.EventType,
 			"count":      r.Count,
