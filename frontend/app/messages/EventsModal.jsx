@@ -47,20 +47,6 @@ export default function EventsModal({showModal, selectedMessage, onClose}) {
 
     };
 
-    const getBorderColor = (eventType) => {
-
-        const colors = {
-            "success": "#198754",
-            "warning": "#ffc107",
-            "danger": "#dc3545",
-            "info": "#0dcaf0",
-            "primary": "#0d6efd"
-        };
-
-        return colors[getEventTypeBadge(eventType)] || "#6c757d";
-
-    };
-
     if (!showModal) return null;
 
     return (
@@ -81,7 +67,7 @@ export default function EventsModal({showModal, selectedMessage, onClose}) {
 
                     </div>
 
-                    <div className="modal-body">
+                    <div className="modal-body modal-body-restricted">
 
                         <div className="card mb-4 bg-light">
 
@@ -153,7 +139,7 @@ export default function EventsModal({showModal, selectedMessage, onClose}) {
 
                                     <div key={index} className="timeline-item mb-4">
 
-                                        <div className="card border-start border-4" style={{borderColor: getBorderColor(event.type)}}>
+                                        <div className="card">
                                             <div className="card-body">
 
                                                 <div className="d-flex justify-content-between align-items-start mb-2">

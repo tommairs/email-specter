@@ -27,3 +27,8 @@ main {
 .bg-secondary {
     background-color: #f8f9fa !important; /* Light gray background */
 }
+
+.modal-body-restricted {
+    max-height: 85vh;
+    overflow-y: auto;
+}

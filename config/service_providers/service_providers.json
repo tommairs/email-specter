@@ -220,7 +220,7 @@
     "name": "Telstra"
   },
   {
-    "regex": "(^|\.)((xtra\.co\.nz)|(myxtra\.co\.nz)|(spark\.co\.nz))$",
+    "regex": "(^|\\.)((xtra\\.co\\.nz)|(myxtra\\.co\\.nz)|(spark\\.co\\.nz))$",
     "name": "Spark NZ"
   }
 ]
