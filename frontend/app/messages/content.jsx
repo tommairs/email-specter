@@ -10,7 +10,8 @@ import {Dropdown} from "primereact/dropdown";
 import StorageHelper from "@/helpers/StorageHelper";
 import {DataTable} from "primereact/datatable";
 import {Column} from "primereact/column";
-import EventsModal from "./EventsModal";
+import EventsModal from "./components/EventsModal";
+import GlobalHelper from "@/helpers/GlobalHelper";
 
 export default function Content() {
 
@@ -105,7 +106,6 @@ export default function Content() {
             <div className="d-flex align-items-center mb-4">
 
                 <div className="flex align-items-center gap-3 mb-4">
-                    <i className="pi pi-chart-bar text-6xl text-primary"></i>
                     <div>
                         <h1 className="text-3xl font-bold text-900 m-0">Messages</h1>
                         <p className="text-600 m-0 mt-1">
@@ -347,15 +347,14 @@ function Filters({filters, setFilters, handleClear}) {
 
     const loadTopEntries = async () => {
 
-        const response = await RequestHelper.sendAuthenticatedGetRequest("/reports/top-entities");
-        const data = response.data;
+        const data = await GlobalHelper.fetchTopEntities();
 
-        if (data.success) {
+        if (data) {
 
             setEntities({
-                destination_services: data.data.destination_services || [],
-                kumo_mta_bounce_classification: data.data.kumo_mta_bounce_classification || [],
-                source_ips: data.data.source_ips || [],
+                destination_services: data.destination_services || [],
+                kumo_mta_bounce_classification: data.kumo_mta_bounce_classification || [],
+                source_ips: data.source_ips || [],
             });
 
         }

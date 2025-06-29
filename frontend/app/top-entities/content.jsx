@@ -34,16 +34,15 @@ export default function Content() {
 
         setLoading(true);
 
-        const response = await RequestHelper.sendAuthenticatedGetRequest("/reports/top-entities");
-        const data = response.data;
+        const data = await GlobalHelper.fetchTopEntities();
 
         if (data.success) {
 
             setEntities({
-                destination_domains: (data.data.destination_domains || []).map(name => ({ name })),
-                destination_services: (data.data.destination_services || []).map(name => ({ name })),
-                source_domains: (data.data.source_domains || []).map(name => ({ name })),
-                source_ips: (data.data.source_ips || []).map(name => ({ name })),
+                destination_domains: (data.destination_domains || []).map(name => ({ name })),
+                destination_services: (data.destination_services || []).map(name => ({ name })),
+                source_domains: (data.source_domains || []).map(name => ({ name })),
+                source_ips: (data.source_ips || []).map(name => ({ name })),
             });
 
         }
