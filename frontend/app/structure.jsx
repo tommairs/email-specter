@@ -132,10 +132,8 @@ export default function Structure({children}) {
                 </div>
             </nav>
 
-            <main>
-                <div className="container mt-4">
-                    {children}
-                </div>
+            <main className="mt-5">
+                {children}
             </main>
 
             <footer className="bg-dark text-white mt-4">

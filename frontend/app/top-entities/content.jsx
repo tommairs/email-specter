@@ -14,6 +14,7 @@ import {Badge} from 'primereact/badge';
 import {Skeleton} from 'primereact/skeleton';
 import {Card} from 'primereact/card';
 import GlobalHelper from "@/helpers/GlobalHelper";
+import Loading from "@/components/Loading";
 
 export default function Content() {
 
@@ -147,26 +148,11 @@ export default function Content() {
     ];
 
     if (loading) {
-
-        return (
-            <div className="card">
-                <div className="border-round border-1 surface-border p-4 surface-card">
-                    <div className="flex mb-3">
-                        <div>
-                            <Skeleton width="10rem" className="mb-2"></Skeleton>
-                            <Skeleton width="5rem" className="mb-2"></Skeleton>
-                            <Skeleton height=".5rem"></Skeleton>
-                        </div>
-                    </div>
-                    <Skeleton width="100%" height="300px"></Skeleton>
-                </div>
-            </div>
-        );
-
+        return <Loading/>;
     }
 
     return (
-        <>
+        <div className={"container"}>
 
             <div className="flex align-items-center gap-3 mb-4">
                 <i className="pi pi-chart-bar text-6xl text-primary"></i>
@@ -242,7 +228,7 @@ export default function Content() {
                 </div>
             </div>
 
-        </>
+        </div>
     );
 
 }

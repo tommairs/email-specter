@@ -27,9 +27,10 @@ func updateMessageStatus(webhookData model.WebhookEvent, message *model.Message,
 
 	}
 
-	// Good to overwrite it because the destination service cannot be determined at "Reception" event
+	// Good to overwrite it because the destination service, source IP cannot be determined at the time of reception
 
-	message.DestinationService = getServiceName(webhookData.PeerAddress.Name, message.SourceDomain)
+	message.DestinationService = getServiceName(webhookData.PeerAddress.Name, message.DestinationDomain)
+	message.SourceIP = getIPAddress(webhookData.SourceAddress.Address)
 
 	result := message.Save() == nil
 

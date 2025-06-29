@@ -429,6 +429,7 @@ func getTopEntities() map[string]interface{} {
 		{"source_ips", "source_ip", 0, true},
 		{"source_domains", "source_domain", 1000, true},
 		{"destination_domains", "destination_domain", 1000, true},
+		{"kumo_mta_bounce_classification", "kumo_mta_bounce_classification", 1000, true},
 	}
 
 	for _, config := range entityConfigs {
