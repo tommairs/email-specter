@@ -1,5 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './bootstrap.min.css';
+import "primereact/resources/themes/lara-light-cyan/theme.css";
 import "./globals.css";
 import Structure from "@/app/structure";
 import {Toaster} from "react-hot-toast";

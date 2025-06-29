@@ -1,14 +1,25 @@
 .antialiased {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 main {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 .fs-xs {
-  font-size: 0.75rem; /* 12px */
+    font-size: 0.75rem; /* 12px */
+}
+
+.p-datatable .p-datatable-tbody > tr > td,
+.p-datatable .p-datatable-thead > tr > th,
+.p-paginator-bottom {
+    border: 1px solid #dee2e6 !important;
+}
+
+.p-dropdown-items {
+    padding-left: 0 !important;
+    margin-bottom: 0 !important;
 }
