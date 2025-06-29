@@ -19,5 +19,15 @@ export default class GlobalHelper {
 
     };
 
+    static addCommasToNumber = (number) => {
+
+        if (typeof number !== 'number') {
+            return number; // Return as is if not a number
+        }
+
+        return number.toLocaleString('en-US'); // Format number with commas
+
+    };
+
 
 }

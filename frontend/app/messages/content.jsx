@@ -46,7 +46,7 @@ export default function Content() {
             destination_domain: filters.destinationDomain || "",
             last_status: filters.lastStatus || "",
             email_specter_bounce_classification: filters.emailSpecterBounceClassification || "",
-            kumo_mta_bounce_classification: filters.kumoMtaBounceClassification || "",
+            kumo_mta_classifications: filters.kumoMtaBounceClassification || "",
             page: filters.page || 1,
         };
 
@@ -306,7 +306,7 @@ function MessageTables({messages}) {
                 <br/>
 
                 <span className="font-medium">
-                    <label className={`badge bg-dark`}>{rowData['kumo_mta_bounce_classification'] || 'N/A'}</label>
+                    <label className={`badge bg-dark`}>{rowData['kumo_mta_classifications'] || 'N/A'}</label>
                 </span>
 
             </div>
@@ -341,7 +341,7 @@ function Filters({filters, setFilters, handleClear}) {
 
     const [entities, setEntities] = useState({
         destination_services: [],
-        kumo_mta_bounce_classification: [],
+        kumo_mta_classifications: [],
         source_ips: [],
     });
 
@@ -353,7 +353,7 @@ function Filters({filters, setFilters, handleClear}) {
 
             setEntities({
                 destination_services: data.destination_services || [],
-                kumo_mta_bounce_classification: data.kumo_mta_bounce_classification || [],
+                kumo_mta_classifications: data.kumo_mta_classifications || [],
                 source_ips: data.source_ips || [],
             });
 
@@ -485,11 +485,11 @@ function Filters({filters, setFilters, handleClear}) {
                     </div>
 
                     <div className="col-md-3">
-                        <label className="form-label">Kumo MTA Classification</label>
+                        <label className="form-label">KumoMTA Classification</label>
                         <Dropdown
                             name="kumoMtaBounceClassification"
                             value={filters.kumoMtaBounceClassification || ''}
-                            options={entities['kumo_mta_bounce_classification']}
+                            options={entities['kumo_mta_classifications']}
                             onChange={handleChange}
                             placeholder="All Classifications"
                             className="w-100"

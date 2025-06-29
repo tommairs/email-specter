@@ -51,6 +51,7 @@ type ReportRequest struct {
 	EmailSpecterClassification string `json:"email_specter_classification"`
 	EventType                  string `json:"event_type"`
 	GroupBy                    string `json:"group_by"`
+	MaxResults                 int    `json:"max_results"`
 }
 
 func GenerateReport(c *fiber.Ctx) error {
@@ -71,6 +72,16 @@ func GenerateReport(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"success": false,
 			"message": "Invalid date format. Please use YYYY-MM-DD.",
+			"data":    nil,
+		})
+
+	}
+
+	if request.GroupBy != "source_ip" && request.GroupBy != "source_domain" && request.GroupBy != "destination_domain" && request.GroupBy != "destination_service" && request.GroupBy != "kumo_mta_classification" && request.GroupBy != "email_specter_classification" {
+
+		return c.JSON(fiber.Map{
+			"success": false,
+			"message": "Invalid group_by value. Allowed values are 'source_ip', 'source_domain', 'destination_domain', 'destination_service', 'kumo_mta_classification', or 'email_specter_classification'.",
 			"data":    nil,
 		})
 

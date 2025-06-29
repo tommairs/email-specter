@@ -13,7 +13,7 @@ import (
 )
 
 func GetAggregatedDataByRange(from string, to string) []map[string]interface{} {
-	
+
 	collection := database.MongoConn.Collection("aggregated_statistics")
 
 	matchStage := bson.D{}
@@ -113,6 +113,61 @@ func GetAggregatedDataByRange(from string, to string) []map[string]interface{} {
 
 func filterData(requestData ReportRequest) []map[string]interface{} {
 
+	pipeline := mongo.Pipeline{
+
+		{{"$match", buildMatchFilter(requestData)}},
+
+		{{"$group", bson.D{
+			{"_id", "$" + requestData.GroupBy},
+			{"total_count", bson.D{{"$sum", "$count"}}},
+		}}},
+
+		{{"$sort", bson.D{{"total_count", -1}}}},
+	}
+
+	if requestData.MaxResults > 0 {
+		pipeline = append(pipeline, bson.D{{"$limit", requestData.MaxResults}})
+	}
+
+	collection := database.MongoConn.Collection("aggregated_statistics")
+
+	cursor, err := collection.Aggregate(context.TODO(), pipeline)
+
+	if err != nil {
+		return nil
+	}
+
+	defer cursor.Close(context.TODO())
+
+	var results []bson.M
+
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		return nil
+	}
+
+	final := make([]map[string]interface{}, 0, len(results))
+
+	for _, result := range results {
+
+		groupValue := result["_id"]
+
+		if groupValue == nil {
+			continue
+		}
+
+		final = append(final, map[string]interface{}{
+			"item":  groupValue,
+			"count": result["total_count"],
+		})
+
+	}
+
+	return final
+
+}
+
+func buildMatchFilter(requestData ReportRequest) bson.D {
+
 	filter := bson.D{
 		{"date", bson.D{
 			{"$gte", requestData.From},
@@ -120,100 +175,39 @@ func filterData(requestData ReportRequest) []map[string]interface{} {
 		}},
 	}
 
+	var conditions []bson.E
+
 	if requestData.SourceIP != "" {
-		filter = append(filter, bson.E{Key: "source_ip", Value: requestData.SourceIP})
+		conditions = append(conditions, bson.E{Key: "source_ip", Value: requestData.SourceIP})
 	}
 
 	if requestData.SourceDomain != "" {
-		filter = append(filter, bson.E{Key: "source_domain", Value: requestData.SourceDomain})
+		conditions = append(conditions, bson.E{Key: "source_domain", Value: requestData.SourceDomain})
 	}
 
 	if requestData.DestinationDomain != "" {
-		filter = append(filter, bson.E{Key: "destination_domain", Value: requestData.DestinationDomain})
+		conditions = append(conditions, bson.E{Key: "destination_domain", Value: requestData.DestinationDomain})
 	}
 
 	if requestData.DestinationService != "" {
-		filter = append(filter, bson.E{Key: "destination_service", Value: requestData.DestinationService})
+		conditions = append(conditions, bson.E{Key: "destination_service", Value: requestData.DestinationService})
 	}
 
 	if requestData.KumoMtaClassification != "" {
-		filter = append(filter, bson.E{"kumo_mta_classification", requestData.KumoMtaClassification})
+		conditions = append(conditions, bson.E{Key: "kumo_mta_classification", Value: requestData.KumoMtaClassification})
 	}
 
 	if requestData.EmailSpecterClassification != "" {
-		filter = append(filter, bson.E{"email_specter_classification", requestData.EmailSpecterClassification})
+		conditions = append(conditions, bson.E{Key: "email_specter_classification", Value: requestData.EmailSpecterClassification})
 	}
 
 	if requestData.EventType != "" {
-		filter = append(filter, bson.E{"event_type", requestData.EventType})
+		conditions = append(conditions, bson.E{Key: "event_type", Value: requestData.EventType})
 	}
 
-	collection := database.MongoConn.Collection("aggregated_statistics")
+	filter = append(filter, conditions...)
 
-	cursor, err := collection.Find(context.TODO(), filter)
-
-	if err != nil {
-		log.Println("Aggregation error:", err)
-		return nil
-	}
-
-	defer cursor.Close(context.TODO())
-
-	var results []map[string]interface{}
-
-	if err = cursor.All(context.TODO(), &results); err != nil {
-		return nil
-	}
-
-	if requestData.GroupBy != "" {
-
-		grouped := make(map[string]int)
-
-		for _, r := range results {
-
-			groupValRaw, ok := r[requestData.GroupBy]
-
-			if !ok {
-				continue
-			}
-
-			groupVal, ok := groupValRaw.(string)
-			if !ok {
-				continue
-			}
-
-			countRaw, ok := r["count"]
-
-			if !ok {
-				continue
-			}
-
-			count := util.EnforceInt(countRaw)
-
-			grouped[groupVal] += count
-
-		}
-
-		final := make([]map[string]interface{}, 0, len(grouped))
-
-		for key, total := range grouped {
-
-			final = append(final, map[string]interface{}{
-				requestData.GroupBy: key,
-				"count":             total,
-			})
-
-		}
-
-		sort.Slice(final, func(i, j int) bool {
-			return final[i][requestData.GroupBy].(string) < final[j][requestData.GroupBy].(string)
-		})
-
-		return final
-
-	}
-
-	return results
+	return filter
 
 }
 
@@ -449,7 +443,7 @@ func getTopEntities() map[string]interface{} {
 		{"source_ips", "source_ip", 0, true},
 		{"source_domains", "source_domain", 1000, true},
 		{"destination_domains", "destination_domain", 1000, true},
-		{"kumo_mta_bounce_classification", "kumo_mta_bounce_classification", 1000, true},
+		{"kumo_mta_classifications", "kumo_mta_classification", 1000, true},
 	}
 
 	for _, config := range entityConfigs {
