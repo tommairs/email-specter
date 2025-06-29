@@ -1,214 +1,226 @@
 [
   {
-    "regex": "^([a-zA-Z0-9-]+\\.)*(gmail\\.com|google\\.com)$",
+    "regex": "(^|\\.)gmail\\.com$",
     "name": "Gmail"
   },
   {
-    "regex": ".*\\.yahoo\\.(com|co\\.in|com\\.ar|com\\.br|es|fr)$",
+    "regex": "(^|\\.)google\\.com$",
+    "name": "Google"
+  },
+  {
+    "regex": "(^|\\.)yahoo\\.(com|co\\.in|com\\.ar|com\\.br|es|fr)$",
     "name": "Yahoo Mail"
   },
   {
-    "regex": ".*\\.ymail\\.com$",
+    "regex": "(^|\\.)ymail\\.com$",
     "name": "Yahoo Mail"
   },
   {
-    "regex": ".*\\.hotmail\\.(com|co\\.uk|fr|it)$",
+    "regex": "(^|\\.)hotmail\\.(com|co\\.uk|fr|it)$",
     "name": "Hotmail"
   },
   {
-    "regex": ".*\\.outlook\\.(com|co\\.id|com\\.vn|es|fr)$",
+    "regex": "(^|\\.)outlook\\.(com|co\\.id|com\\.vn|es|fr)$",
     "name": "Outlook"
   },
   {
-    "regex": ".*\\.live\\.(com|fr)$",
+    "regex": "(^|\\.)live\\.(com|fr)$",
     "name": "Outlook"
   },
   {
-    "regex": ".*\\.windowslive\\.com$",
+    "regex": "(^|\\.)windowslive\\.com$",
     "name": "Windows Live"
   },
   {
-    "regex": ".*\\.icloud\\.com$",
+    "regex": "(^|\\.)icloud\\.com$",
     "name": "iCloud"
   },
   {
-    "regex": ".*\\.aol\\.com$",
+    "regex": "(^|\\.)aol\\.com$",
     "name": "AOL Mail"
   },
   {
-    "regex": ".*\\.zoho\\.com$",
+    "regex": "(^|\\.)zoho\\.com$",
     "name": "Zoho Mail"
   },
   {
-    "regex": ".*\\.zohomail\\.eu$",
+    "regex": "(^|\\.)zohomail\\.eu$",
     "name": "Zoho Mail"
   },
   {
-    "regex": ".*\\.gmx\\.(com|de|net)$",
+    "regex": "(^|\\.)gmx\\.(com|de|net)$",
     "name": "GMX Mail"
   },
   {
-    "regex": ".*\\.protonmail\\.(com|ch)$",
+    "regex": "(^|\\.)protonmail\\.(com|ch)$",
     "name": "ProtonMail"
   },
   {
-    "regex": ".*\\.proton\\.me$",
+    "regex": "(^|\\.)proton\\.me$",
     "name": "ProtonMail"
   },
   {
-    "regex": ".*\\.pm\\.me$",
+    "regex": "(^|\\.)pm\\.me$",
     "name": "ProtonMail"
   },
   {
-    "regex": ".*\\.mail\\.ru$",
+    "regex": "(^|\\.)mail\\.ru$",
     "name": "Mail.ru"
   },
   {
-    "regex": ".*\\.list\\.ru$",
+    "regex": "(^|\\.)list\\.ru$",
     "name": "Mail.ru"
   },
   {
-    "regex": ".*\\.bk\\.ru$",
+    "regex": "(^|\\.)bk\\.ru$",
     "name": "Mail.ru"
   },
   {
-    "regex": ".*\\.inbox\\.ru$",
+    "regex": "(^|\\.)inbox\\.ru$",
     "name": "Mail.ru"
   },
   {
-    "regex": ".*\\.ro\\.ru$",
+    "regex": "(^|\\.)ro\\.ru$",
     "name": "Mail.ru"
   },
   {
-    "regex": ".*\\.myrambler\\.ru$",
+    "regex": "(^|\\.)myrambler\\.ru$",
     "name": "Mail.ru"
   },
   {
-    "regex": ".*\\.rambler\\.ru$",
+    "regex": "(^|\\.)rambler\\.ru$",
     "name": "Mail.ru"
   },
   {
-    "regex": ".*\\.rambler\\.ua$",
+    "regex": "(^|\\.)rambler\\.ua$",
     "name": "Mail.ru"
   },
   {
-    "regex": ".*\\.ya\\.ru$",
+    "regex": "(^|\\.)ya\\.ru$",
     "name": "Mail.ru"
   },
   {
-    "regex": ".*\\.yandex\\.(com|ru)$",
+    "regex": "(^|\\.)yandex\\.(com|ru)$",
     "name": "Yandex"
   },
   {
-    "regex": ".*\\.mail\\.com$",
+    "regex": "(^|\\.)mail\\.com$",
     "name": "Mail.com"
   },
   {
-    "regex": ".*\\.usa\\.com$",
+    "regex": "(^|\\.)usa\\.com$",
     "name": "Mail.com"
   },
   {
-    "regex": ".*\\.tutanota\\.com$",
+    "regex": "(^|\\.)tutanota\\.com$",
     "name": "Tutanota"
   },
   {
-    "regex": ".*\\.tutamail\\.com$",
+    "regex": "(^|\\.)tutamail\\.com$",
     "name": "Tutanota"
   },
   {
-    "regex": ".*\\.tuta\\.io$",
+    "regex": "(^|\\.)tuta\\.io$",
     "name": "Tutanota"
   },
   {
-    "regex": ".*\\.rediff\\.com$",
+    "regex": "(^|\\.)rediff\\.com$",
     "name": "Rediff Mail"
   },
   {
-    "regex": ".*\\.rediffmail\\.com$",
+    "regex": "(^|\\.)rediffmail\\.com$",
     "name": "Rediff Mail"
   },
   {
-    "regex": ".*\\.seznam\\.cz$",
+    "regex": "(^|\\.)seznam\\.cz$",
     "name": "Seznam"
   },
   {
-    "regex": ".*\\.t-online\\.de$",
+    "regex": "(^|\\.)t-online\\.de$",
     "name": "T-Online"
   },
   {
-    "regex": ".*\\.interia\\.pl$",
+    "regex": "(^|\\.)interia\\.pl$",
     "name": "Interia"
   },
   {
-    "regex": ".*\\.web\\.de$",
+    "regex": "(^|\\.)web\\.de$",
     "name": "Web.de"
   },
   {
-    "regex": ".*\\.laposte\\.net$",
+    "regex": "(^|\\.)laposte\\.net$",
     "name": "Laposte"
   },
   {
-    "regex": ".*\\.libero\\.it$",
+    "regex": "(^|\\.)libero\\.it$",
     "name": "Libero Mail"
   },
   {
-    "regex": ".*\\.sapo\\.pt$",
+    "regex": "(^|\\.)sapo\\.pt$",
     "name": "Sapo"
   },
   {
-    "regex": ".*\\.wp\\.pl$",
+    "regex": "(^|\\.)wp\\.pl$",
     "name": "WP.pl"
   },
   {
-    "regex": ".*\\.o2\\.pl$",
+    "regex": "(^|\\.)o2\\.pl$|(^|\\.)mx\\.tlen\\.pl$",
     "name": "O2 Mail"
   },
   {
-    "regex": ".*\\.onet\\.pl$",
+    "regex": "(^|\\.)onet\\.pl$",
     "name": "Onet"
   },
   {
-    "regex": ".*\\.qq\\.com$",
+    "regex": "(^|\\.)qq\\.com$",
     "name": "QQ Mail"
   },
   {
-    "regex": ".*\\.freenet\\.de$",
+    "regex": "(^|\\.)freenet\\.de$",
     "name": "Freenet"
   },
   {
-    "regex": ".*\\.free\\.fr$",
+    "regex": "(^|\\.)free\\.fr$",
     "name": "Free"
   },
   {
-    "regex": ".*\\.naver\\.com$",
+    "regex": "(^|\\.)naver\\.com$",
     "name": "Naver Mail"
   },
   {
-    "regex": ".*\\.maileroo\\.com$",
+    "regex": "(^|\\.)maileroo\\.com$",
     "name": "Maileroo"
   },
   {
-    "regex": ".*\\.hey\\.com$",
+    "regex": "(^|\\.)hey\\.com$",
     "name": "HEY"
   },
   {
-    "regex": ".*\\.yahoodns\\.net$",
+    "regex": "(^|\\.)yahoodns\\.net$",
     "name": "Yahoo Mail"
   },
   {
-    "regex": ".*\\.vodafonemail\\.de$",
+    "regex": "(^|\\.)vodafonemail\\.de$",
     "name": "Vodafone"
   },
   {
-    "regex": ".*\\.comcast\\.net$",
+    "regex": "(^|\\.)comcast\\.net$",
     "name": "Comcast"
   },
   {
-    "regex": ".*\\.prodigy\\.net$",
+    "regex": "(^|\\.)prodigy\\.net$",
     "name": "AT&T"
   },
   {
-    "regex": ".*\\.btinternet\\.com$",
+    "regex": "(^|\\.)btinternet\\.com$",
     "name": "BT"
+  },
+  {
+    "regex": "(^|\\.)((telstra\\.(com|com\\.au|net))|(bigpond\\.(com|com\\.au|net\\.au)))$",
+    "name": "Telstra"
+  },
+  {
+    "regex": "(^|\.)((xtra\.co\.nz)|(myxtra\.co\.nz)|(spark\.co\.nz))$",
+    "name": "Spark NZ"
   }
 ]

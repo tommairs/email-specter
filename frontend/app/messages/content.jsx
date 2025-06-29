@@ -10,6 +10,7 @@ import {Dropdown} from "primereact/dropdown";
 import StorageHelper from "@/helpers/StorageHelper";
 import {DataTable} from "primereact/datatable";
 import {Column} from "primereact/column";
+import EventsModal from "./EventsModal";
 
 export default function Content() {
 
@@ -177,7 +178,6 @@ export default function Content() {
                                     totalPages={100}
                                     onPageChange={(page) => {
                                         setFilters(prev => ({...prev, page}));
-                                        fetchMessages();
                                     }}
                                 />
                             </div>
@@ -196,6 +196,9 @@ export default function Content() {
 }
 
 function MessageTables({messages}) {
+
+    const [showModal, setShowModal] = useState(false);
+    const [selectedMessage, setSelectedMessage] = useState({});
 
     const getPath = (rowData) => {
 
@@ -249,10 +252,10 @@ function MessageTables({messages}) {
 
     const getStatus = (rowData) => {
         const statusBadge = {
-            "Reception": "success",
+            "Reception": "info",
             "TransientFailure": "warning",
             "Bounce": "danger",
-            "Delivery": "info"
+            "Delivery": "success"
         }[rowData['last_status']] || "secondary";
 
         return (
@@ -263,13 +266,15 @@ function MessageTables({messages}) {
 
     };
 
-    const showEventsModal = (events) => {
+    const showEventsModal = (rowData) => {
 
-        // Implement the logic to show events modal
-        // This could be a custom modal component that displays the events
-        // For now, we will just log the events to the console
-        console.log("Events:", events);
+        setSelectedMessage(rowData);
+        setShowModal(true);
 
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
     };
 
     const getEvents = (rowData) => {
@@ -279,7 +284,7 @@ function MessageTables({messages}) {
         }
 
         return (
-            <button className="btn btn-sm btn-outline-secondary" onClick={() => showEventsModal(rowData['events'])}>
+            <button className="btn btn-sm btn-outline-secondary" onClick={() => showEventsModal(rowData)}>
                 Events
                 <span className="badge bg-dark ms-2">
                     {rowData['events'].length}
@@ -314,14 +319,24 @@ function MessageTables({messages}) {
     };
 
     return (
-        <DataTable value={messages}>
-            <Column field="date" header="Date & Time" body={(rowData) => getDateTime(rowData)}/>
-            <Column field="path" header="Path" body={(rowData) => getPath(rowData)}/>
-            <Column field="ip_destination" header="IP Destination" body={(rowData) => getIPDestination(rowData)}/>
-            <Column field="status" header="Status" body={(rowData) => getStatus(rowData)}/>
-            <Column field="events" header="Events" body={(rowData) => getEvents(rowData)}/>
-            <Column field="classifications" header="Classifications" body={(rowData) => getClassifications(rowData)}/>
-        </DataTable>
+        <>
+
+            <DataTable value={messages}>
+                <Column field="date" header="Date & Time" body={(rowData) => getDateTime(rowData)}/>
+                <Column field="path" header="Path" body={(rowData) => getPath(rowData)}/>
+                <Column field="ip_destination" header="IP Destination" body={(rowData) => getIPDestination(rowData)}/>
+                <Column field="status" header="Status" body={(rowData) => getStatus(rowData)}/>
+                <Column field="events" header="Events" body={(rowData) => getEvents(rowData)}/>
+                <Column field="classifications" header="Classifications" body={(rowData) => getClassifications(rowData)}/>
+            </DataTable>
+
+            <EventsModal
+                showModal={showModal}
+                selectedMessage={selectedMessage}
+                onClose={closeModal}
+            />
+
+        </>
     );
 
 }
