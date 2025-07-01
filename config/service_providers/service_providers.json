@@ -230,5 +230,9 @@
   {
     "regex": "(^|\\.)pphosted\\.com$",
     "name": "Proofpoint"
+  },
+  {
+    "regex": "(^|\\.)mx.cloudflare\\.net",
+    "name": "Cloudflare Email Routing"
   }
 ]
