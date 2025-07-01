@@ -100,7 +100,7 @@
     "name": "Mail.ru"
   },
   {
-    "regex": "(^|\\.)yandex\\.(com|ru)$",
+    "regex": "(^|\\.)yandex\\.(com|ru|net)$",
     "name": "Yandex"
   },
   {
@@ -222,5 +222,13 @@
   {
     "regex": "(^|\\.)((xtra\\.co\\.nz)|(myxtra\\.co\\.nz)|(spark\\.co\\.nz))$",
     "name": "Spark NZ"
+  },
+  {
+    "regex": "(^|\\.)mimecast\\.com$",
+    "name": "Mimecast"
+  },
+  {
+    "regex": "(^|\\.)pphosted\\.com$",
+    "name": "Proofpoint"
   }
 ]
