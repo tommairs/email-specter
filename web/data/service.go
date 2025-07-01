@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"email-specter/config"
 	"email-specter/database"
 	"email-specter/util"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,6 +16,11 @@ import (
 type ProviderDataEntry struct {
 	Date   string         `json:"date"`
 	Events map[string]int `json:"events"`
+}
+
+var topEntitiesCache struct {
+	data      map[string]interface{}
+	expiresAt time.Time
 }
 
 func GetAggregatedDataByRange(from string, to string) []map[string]interface{} {
@@ -456,6 +462,10 @@ func aggregateEntityData(startDate, endDate, fieldName string, limit int, requir
 
 func getTopEntities() map[string]interface{} {
 
+	if topEntitiesCache.data != nil && time.Now().Before(topEntitiesCache.expiresAt) {
+		return topEntitiesCache.data
+	}
+
 	startDate, endDate := getDateRangeForLastMonth()
 
 	result := make(map[string]interface{})
@@ -480,6 +490,9 @@ func getTopEntities() map[string]interface{} {
 		}
 
 	}
+
+	topEntitiesCache.data = result
+	topEntitiesCache.expiresAt = time.Now().Add(config.TopEntitiesCacheDuration)
 
 	return result
 
