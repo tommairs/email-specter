@@ -36,16 +36,12 @@ export default function Content() {
 
         const data = await GlobalHelper.fetchTopEntities();
 
-        if (data.success) {
-
-            setEntities({
-                destination_domains: (data.destination_domains || []).map(name => ({ name })),
-                destination_services: (data.destination_services || []).map(name => ({ name })),
-                source_domains: (data.source_domains || []).map(name => ({ name })),
-                source_ips: (data.source_ips || []).map(name => ({ name })),
-            });
-
-        }
+        setEntities({
+            destination_domains: (data.destination_domains || []).map(name => ({name})),
+            destination_services: (data.destination_services || []).map(name => ({name})),
+            source_domains: (data.source_domains || []).map(name => ({name})),
+            source_ips: (data.source_ips || []).map(name => ({name})),
+        });
 
         setLoading(false);
 

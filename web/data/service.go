@@ -12,6 +12,11 @@ import (
 	"time"
 )
 
+type ProviderDataEntry struct {
+	Date   string         `json:"date"`
+	Events map[string]int `json:"events"`
+}
+
 func GetAggregatedDataByRange(from string, to string) []map[string]interface{} {
 
 	collection := database.MongoConn.Collection("aggregated_statistics")
@@ -211,7 +216,7 @@ func buildMatchFilter(requestData ReportRequest) bson.D {
 
 }
 
-func getProviderData(requestData ProviderDataRequest) map[string]map[string]int {
+func getProviderData(requestData ProviderDataRequest) []ProviderDataEntry {
 
 	filter := bson.D{
 		{"date", bson.D{
@@ -228,9 +233,11 @@ func getProviderData(requestData ProviderDataRequest) map[string]map[string]int 
 		filter = append(filter, bson.E{Key: "destination_service", Value: requestData.DestinationService})
 	}
 
-	collection := database.MongoConn.Collection("aggregated_statistics")
+	findOptions := options.Find()
+	findOptions.SetSort(bson.D{{"date", -1}})
 
-	cursor, err := collection.Find(context.TODO(), filter)
+	collection := database.MongoConn.Collection("aggregated_statistics")
+	cursor, err := collection.Find(context.TODO(), filter, findOptions)
 
 	if err != nil {
 		log.Println("Aggregation error:", err)
@@ -261,7 +268,24 @@ func getProviderData(requestData ProviderDataRequest) map[string]map[string]int 
 
 	}
 
-	return aggregated
+	var dates []string
+
+	for date := range aggregated {
+		dates = append(dates, date)
+	}
+
+	sort.Sort(sort.Reverse(sort.StringSlice(dates)))
+
+	var ordered []ProviderDataEntry
+
+	for _, date := range dates {
+		ordered = append(ordered, ProviderDataEntry{
+			Date:   date,
+			Events: aggregated[date],
+		})
+	}
+
+	return ordered
 
 }
 
@@ -287,7 +311,10 @@ func getProviderClassificationData(requestData ProviderClassificationRequest) []
 		filter = append(filter, bson.E{Key: "destination_service", Value: requestData.DestinationService})
 	}
 
-	cursor, err := collection.Find(context.TODO(), filter)
+	findOptions := options.Find()
+	findOptions.SetSort(bson.D{{"date", -1}})
+
+	cursor, err := collection.Find(context.TODO(), filter, findOptions)
 
 	if err != nil {
 		log.Println("Aggregation error:", err)
