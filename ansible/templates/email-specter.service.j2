@@ -1,0 +1,15 @@
+[Unit]
+Description=Email Specter Service
+After=network.target
+
+[Service]
+Type=simple
+User=email-specter
+WorkingDirectory=/home/email-specter
+EnvironmentFile=/home/email-specter/.email_specter/.env
+ExecStart=/usr/local/bin/email-specter
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

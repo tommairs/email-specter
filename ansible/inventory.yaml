@@ -1,0 +1,14 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+
+  vars:
+
+    mongo_db: "email-specter"
+    public_ip: "127.0.0.1"
+    backend_port: 8989
+
+    go_version: "1.24.4"
+    mongodb_version: "8.0.11"
+    nodejs_version: "22"

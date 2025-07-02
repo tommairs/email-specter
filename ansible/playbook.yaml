@@ -1,0 +1,122 @@
+---
+- name: Install Email Specter on Ubuntu
+  hosts: all
+  become: yes
+  vars:
+    mongodb_pkg_install: true
+  roles:
+    - role: trfore.mongodb_install
+
+  tasks:
+    -
+    - name: Enable and start MongoDB
+      systemd:
+        name: mongod
+        enabled: yes
+        state: started
+
+    - name: Ensure MongoDB is running
+      wait_for:
+        host: localhost
+        port: 27017
+        delay: 10
+        timeout: 30
+
+    - name: Install pymongo for MongoDB user management
+      apt:
+        name: python3-pymongo
+        state: present
+
+    - name: Create MongoDB admin user via shell
+      shell: |
+        mongosh admin --eval '
+          db.createUser({
+            user: "{{ mongo_admin_user }}",
+            pwd: "{{ mongo_admin_pass }}",
+            roles: [
+              { role: "userAdminAnyDatabase", db: "admin" },
+              { role: "dbAdminAnyDatabase", db: "admin" },
+              { role: "readWriteAnyDatabase", db: "admin" }
+            ]
+          });
+        '
+      when: mongo_admin_user is defined and mongo_admin_pass is defined
+
+    - name: Install Go
+      ansible.builtin.shell: |
+        wget https://go.dev/dl/go{{ go_version }}.linux-amd64.tar.gz
+        rm -rf /usr/local/go && tar -C /usr/local -xzf go{{ go_version }}.linux-amd64.tar.gz
+        echo 'export PATH=$PATH:/usr/local/go/bin' >> /etc/profile
+        rm -rf go{{ go_version }}.linux-amd64.tar.gz
+      args:
+        executable: /bin/bash
+
+    - name: Install Node.js
+      shell: |
+        curl -fsSL https://deb.nodesource.com/setup_{{ nodejs_version }}.x | sudo -E bash -
+        apt-get install -y nodejs
+
+    - name: Create email-specter user
+      user:
+        name: email-specter
+        shell: /bin/bash
+        home: /home/email-specter
+        create_home: yes
+
+    - name: Create .email_specter config directory
+      file:
+        path: /home/email-specter/.email_specter
+        state: directory
+        owner: email-specter
+        group: email-specter
+        mode: '0755'
+
+    - name: Place .env file in .email_specter folder
+      template:
+        src: templates/backend.env.j2
+        dest: /home/email-specter/.email_specter/.env
+        owner: email-specter
+        group: email-specter
+        mode: '0600'
+
+    - name: Place systemd unit file for email-specter
+      template:
+        src: templates/email-specter.service.j2
+        dest: /etc/systemd/system/email-specter.service
+        mode: '0644'
+
+    - name: Reload systemd daemon
+      command: systemctl daemon-reexec
+
+    - name: Enable and start email-specter service
+      systemd:
+        name: email-specter
+        enabled: yes
+        state: started
+
+    - name: Install PM2 globally
+      npm:
+        name: pm2
+        global: yes
+
+    - name: Place .env file in .email_specter folder
+      template:
+        src: templates/frontend.env.j2
+        dest: frontend/.env
+
+    - name: Build the Frontend
+      shell: |
+        cd frontend
+        npm install
+        npm run build
+
+    - name: Run the Frontend with PM2
+      shell: |
+        cd frontend
+        pm2 start npm --name "email-specter-frontend" -- run start
+
+  handlers:
+    - name: Restart MongoDB
+      systemd:
+        name: mongod
+        state: restarted
