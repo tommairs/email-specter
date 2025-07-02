@@ -47,7 +47,7 @@ export default function View() {
 
             refreshUser();
 
-            router.push('/meessages');
+            router.push('/messages');
 
         } else {
 
