@@ -19,7 +19,7 @@ export default function View() {
 
         const data = response.data;
 
-        if (data['success'] && data['can_register']) {
+        if (data['success'] && data['data']['can_register']) {
 
             router.push('/auth/register');
 
