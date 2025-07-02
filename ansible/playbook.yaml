@@ -108,6 +108,11 @@
         src: templates/frontend.env.j2
         dest: ../frontend/.env
 
+    - name: Remove old frontend folder if it exists
+      file:
+        path: /home/email-specter/frontend
+        state: absent
+
     - name: Copy frontend to email-specter user home
       copy:
         src: ../frontend
@@ -123,9 +128,13 @@
       args:
         chdir: /home/email-specter/frontend
 
-    - name: Run the Frontend with PM2
+    - name: Run or restart the frontend with PM2
       shell: |
-        pm2 start npm --name email-specter-frontend -- start -- --port {{ frontend_port }}
+        if pm2 list | grep -q "email-specter-frontend"; then
+          pm2 restart email-specter-frontend
+        else
+          pm2 start npm --name email-specter-frontend -- start -- --port {{ frontend_port }}
+        fi
         pm2 save
         pm2 startup
       args:
