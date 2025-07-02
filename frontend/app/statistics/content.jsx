@@ -95,7 +95,7 @@ export default function Content() {
             setStatistics(data);
             processDataForCharts(data);
         } else {
-            ToastHelper.errorToast(response.message);
+            ToastHelper.errorToast(data.message);
         }
 
         setLoading(false);
