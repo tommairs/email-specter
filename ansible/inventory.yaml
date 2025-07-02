@@ -8,6 +8,7 @@ all:
     mongo_db: "email-specter"
     public_ip: "127.0.0.1"
     backend_port: 8989
+    frontend_port: 80
 
     go_version: "1.24.4"
     mongodb_version: "8.0.11"

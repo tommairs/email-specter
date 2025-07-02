@@ -115,11 +115,32 @@
       args:
         chdir: ../frontend
 
+    - name: Copy built frontend to server
+      copy:
+        src: ../frontend/
+        dest: /home/email-specter/frontend
+        owner: email-specter
+        group: email-specter
+        mode: '0755'
+        exclude:
+          - node_modules
+          - src
+          - pages
+          - tsconfig.json
+          - tailwind.config.js
+          - postcss.config.js
+          - .git
+          - .gitignore
+          - package.json
+          - package-lock.json
+
     - name: Run the Frontend with PM2
       shell: |
-        pm2 start
+        pm2 start npm --name email-specter-frontend -- start -- --port {{ frontend_port }}
+        pm2 save
+        pm2 startup
       args:
-        chdir: ../frontend
+        chdir: /home/email-specter/frontend
 
   handlers:
     - name: Restart MongoDB
