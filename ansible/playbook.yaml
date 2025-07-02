@@ -22,26 +22,6 @@
         delay: 10
         timeout: 30
 
-    - name: Install pymongo for MongoDB user management
-      apt:
-        name: python3-pymongo
-        state: present
-
-    - name: Create MongoDB admin user via shell
-      shell: |
-        mongosh admin --eval '
-          db.createUser({
-            user: "{{ mongo_admin_user }}",
-            pwd: "{{ mongo_admin_pass }}",
-            roles: [
-              { role: "userAdminAnyDatabase", db: "admin" },
-              { role: "dbAdminAnyDatabase", db: "admin" },
-              { role: "readWriteAnyDatabase", db: "admin" }
-            ]
-          });
-        '
-      when: mongo_admin_user is defined and mongo_admin_pass is defined
-
     - name: Install Go
       ansible.builtin.shell: |
         wget https://go.dev/dl/go{{ go_version }}.linux-amd64.tar.gz
@@ -79,6 +59,30 @@
         group: email-specter
         mode: '0600'
 
+    - name: Copy bounce_categories
+      copy:
+        src: ../config/bounce_categories
+        dest: /home/email-specter/.email_specter/config
+        owner: email-specter
+        group: email-specter
+        mode: '0600'
+
+    - name: Copy service_providers
+      copy:
+        src: ../config/service_providers
+        dest: /home/email-specter/.email_specter/config
+        owner: email-specter
+        group: email-specter
+        mode: '0600'
+
+    - name: Build Email Specter backend
+      shell: |
+        /usr/local/go/bin/go get email-specter
+        /usr/local/go/bin/go build -o /usr/local/bin/email-specter
+        chmod +x /usr/local/bin/email-specter
+      args:
+        chdir: ../
+
     - name: Place systemd unit file for email-specter
       template:
         src: templates/email-specter.service.j2
@@ -99,21 +103,23 @@
         name: pm2
         global: yes
 
-    - name: Place .env file in .email_specter folder
+    - name: Place .env file in frontend directory
       template:
         src: templates/frontend.env.j2
-        dest: frontend/.env
+        dest: ../frontend/.env
 
     - name: Build the Frontend
       shell: |
-        cd frontend
         npm install
         npm run build
+      args:
+        chdir: ../frontend
 
     - name: Run the Frontend with PM2
       shell: |
-        cd frontend
-        pm2 start npm --name "email-specter-frontend" -- run start
+        pm2 start
+      args:
+        chdir: ../frontend
 
   handlers:
     - name: Restart MongoDB

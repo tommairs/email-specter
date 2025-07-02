@@ -15,7 +15,7 @@ export default function View() {
 
     const checkIfInstallationIsSetup = async () => {
 
-        const response = await RequestHelper.sendAuthenticatedGetRequest('/auth/can-register');
+        const response = await RequestHelper.sendAuthenticatedGetRequest('/can-register');
 
         const data = response.data;
 

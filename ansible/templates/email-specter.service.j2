@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 User=email-specter
-WorkingDirectory=/home/email-specter
+WorkingDirectory=/home/email-specter/.email_specter
 EnvironmentFile=/home/email-specter/.email_specter/.env
 ExecStart=/usr/local/bin/email-specter
 Restart=on-failure
