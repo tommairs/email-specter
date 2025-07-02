@@ -108,31 +108,20 @@
         src: templates/frontend.env.j2
         dest: ../frontend/.env
 
+    - name: Copy frontend to email-specter user home
+      copy:
+        src: ../frontend
+        dest: /home/email-specter/frontend
+        owner: email-specter
+        group: email-specter
+        mode: '0600'
+
     - name: Build the Frontend
       shell: |
         npm install
         npm run build
       args:
-        chdir: ../frontend
-
-    - name: Copy built frontend to server using rsync
-      ansible.posix.synchronize:
-        src: ../frontend/
-        dest: /home/email-specter/frontend/
-        recursive: yes
-        delete: no
-        rsync_opts:
-          - "--exclude=node_modules"
-          - "--exclude=src"
-          - "--exclude=pages"
-          - "--exclude=tsconfig.json"
-          - "--exclude=tailwind.config.js"
-          - "--exclude=postcss.config.js"
-          - "--exclude=.git"
-          - "--exclude=.gitignore"
-          - "--exclude=package.json"
-          - "--exclude=package-lock.json"
-      delegate_to: localhost
+        chdir: /home/email-specter/frontend
 
     - name: Run the Frontend with PM2
       shell: |
