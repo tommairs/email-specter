@@ -111,7 +111,7 @@
     - name: Copy frontend to email-specter user home
       copy:
         src: ../frontend
-        dest: /home/email-specter/frontend
+        dest: /home/email-specter
         owner: email-specter
         group: email-specter
         mode: '0600'
