@@ -121,10 +121,13 @@
         group: email-specter
         mode: '0600'
 
-    - name: Build the Frontend
-      shell: |
-        npm install
-        npm run build
+    - name: Install frontend dependencies
+      shell: npm install
+      args:
+        chdir: /home/email-specter/frontend
+
+    - name: Build the frontend
+      shell: npm run build
       args:
         chdir: /home/email-specter/frontend
 
